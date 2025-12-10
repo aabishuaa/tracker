@@ -297,19 +297,19 @@
 
     <!-- Status Update Menu -->
     <div class="status-menu" id="statusMenu">
-        <div class="status-menu-item not-started" onclick="updateItemStatus('Not Started')">
+        <div class="status-menu-item not-started" onclick="window.actionItems.updateItemStatus('Not Started')">
             <i class="fas fa-circle"></i>
             Not Started
         </div>
-        <div class="status-menu-item in-progress" onclick="updateItemStatus('In Progress')">
+        <div class="status-menu-item in-progress" onclick="window.actionItems.updateItemStatus('In Progress')">
             <i class="fas fa-spinner"></i>
             In Progress
         </div>
-        <div class="status-menu-item blocked" onclick="updateItemStatus('Blocked')">
+        <div class="status-menu-item blocked" onclick="window.actionItems.updateItemStatus('Blocked')">
             <i class="fas fa-ban"></i>
             Blocked
         </div>
-        <div class="status-menu-item done" onclick="updateItemStatus('Done')">
+        <div class="status-menu-item done" onclick="window.actionItems.updateItemStatus('Done')">
             <i class="fas fa-check-circle"></i>
             Done
         </div>
@@ -321,7 +321,7 @@
         <span class="toast-message" id="toastMessage"></span>
     </div>
 
-    <!-- External JavaScript -->
-    <script src="app.js"></script>
+    <!-- External JavaScript (ES6 Modules) -->
+    <script type="module" src="js/core/app.js"></script>
 </body>
 </html>
