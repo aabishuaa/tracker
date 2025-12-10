@@ -1,135 +1,118 @@
 # EY AI Taskforce Tracker
 
-A production-quality single-page React application for tracking action items and events for the EY AI Taskforce. Built with React, TypeScript, Vite, and Tailwind CSS.
+Enterprise project management tracker built with **vanilla HTML, CSS, and JavaScript**. No frameworks, no build tools, no dependencies.
 
 ## Features
 
-- **Action Items Table**: Manage tasks with inline editing, priority levels, status tracking, and progress bars
-- **Calendar Sidebar**: View and manage upcoming events with a mini calendar
-- **Snapshot System**: Save and view historical snapshots of your data
-- **CSV Export**: Export action items to CSV for reporting
-- **LocalStorage Persistence**: All data is automatically saved to browser storage
-- **Responsive Design**: Works on desktop, tablet, and mobile devices
+- **Action Items Management**: Create, edit, and track tasks with full details
+- **Calendar Events**: Schedule and view upcoming events with mini calendar
+- **Snapshot History**: Save and view historical states of your project
+- **CSV Export**: Export action items to CSV format
+- **Local Storage**: All data persists in browser localStorage
+- **Sorting**: Sort table columns by clicking headers
+- **Inline Editing**: Edit any field directly in the table
+- **Responsive Design**: Works on desktop and mobile devices
 
-## Getting Started
+## How to Run
 
-### Prerequisites
-
-- Node.js (v16 or higher)
-- npm or yarn
-
-### Installation
-
-```bash
-npm install
-```
-
-### Development
-
-Run the development server:
-
+### Option 1: Python HTTP Server (Recommended)
 ```bash
 npm run dev
+# or
+python3 -m http.server 8080
 ```
 
-Open your browser and navigate to `http://localhost:5173`
+Then open your browser to: http://localhost:8080
 
-### Build
+### Option 2: Direct File Access
+Simply open `index.html` in your browser (some features may be limited)
 
-Build for production:
-
+### Option 3: Any HTTP Server
+Use any static file server of your choice:
 ```bash
-npm run build
+# Using Node's http-server (npm install -g http-server)
+http-server -p 8080
+
+# Using PHP
+php -S localhost:8080
 ```
-
-Preview the production build:
-
-```bash
-npm run preview
-```
-
-## Usage
-
-### Action Items
-
-- Click any cell in the table to edit inline
-- Click the status pill to change status
-- Use the "+ Add Item" button to create new action items
-- Items are automatically grouped by section (Planning, Execution, Discovery, Wrap-up)
-- Priority is indicated by a colored left border (Red: High, Orange: Medium, Green: Low)
-
-### Calendar Events
-
-- View upcoming events in the sidebar
-- Click "+ Add Event" to create new events
-- Events are displayed with colored dots on the mini calendar
-- Categories: Meeting, Deadline, Review, Workshop
-
-### Snapshots
-
-- Click "Save Snapshot" to save the current state
-- Click "View History" to see all saved snapshots
-- Snapshots include both action items and calendar events
-
-### Export
-
-- Click "Export CSV" to download action items as a CSV file
-- File name format: `EY-AI-Taskforce-YYYY-MM-DD.csv`
-
-## Technology Stack
-
-- **React 18** - UI framework
-- **TypeScript** - Type safety
-- **Vite** - Build tool and dev server
-- **Tailwind CSS** - Styling
-- **LocalStorage API** - Data persistence
 
 ## Project Structure
 
 ```
-src/
-  components/
-    ActionItemsTable/
-      ActionItemsTable.tsx
-      TableHeader.tsx
-      TableRow.tsx
-    CalendarSidebar/
-      CalendarSidebar.tsx
-      MiniCalendar.tsx
-      EventCard.tsx
-      AddEventModal.tsx
-    SnapshotHistory/
-      SnapshotHistoryPanel.tsx
-    Header.tsx
-    Toast.tsx
-  hooks/
-    useLocalStorage.ts
-  types/
-    index.ts
-  utils/
-    dateUtils.ts
-    snapshotUtils.ts
-    csvExport.ts
-  styles/
-    index.css
-  App.tsx
-  main.tsx
+tracker/
+├── index.html      # Main HTML structure
+├── styles.css      # All styling
+├── app.js          # Application logic
+├── package.json    # Project metadata
+└── README.md       # This file
 ```
 
-## Design Principles
+Simple. Clean. Just three files.
 
-- **EY Brand Colors**: Yellow (#FFE600) as primary accent
-- **Enterprise UI**: Professional, clean design suitable for executive use
-- **System Font**: Uses system-ui font stack for optimal performance
-- **Accessibility**: Keyboard navigable, semantic HTML, ARIA labels
-- **Micro-interactions**: Smooth transitions and hover effects
+## Usage
 
-## Browser Support
+### Action Items
+- Click **"+ Add Item"** to create a new task
+- Edit any field directly in the table (description, owner, date, status, priority, section, progress, notes)
+- Click column headers to **sort** by that column
+- Track progress with the progress bar and percentage input
+- Delete items with the **Delete** button
+- All changes are **automatically saved** to localStorage
 
-- Chrome (latest)
-- Firefox (latest)
-- Safari (latest)
-- Edge (latest)
+### Calendar Events
+- Click **"+ Add Event"** to create a new calendar event
+- Fill in title, date, description, category, and color
+- View events in chronological order in the sidebar
+- Mini calendar shows current month with dots on days that have events
+- Events are color-coded by category
+
+### Snapshots
+- Click **"Save Snapshot"** to capture current state
+- View history by clicking **"History"** button
+- Each snapshot includes all action items and calendar events
+- Snapshots are stored locally in your browser
+
+### Export
+- Click **"Export CSV"** to download action items as CSV
+- Opens with Excel, Google Sheets, or any CSV reader
+- File format: `ey-action-items-YYYY-MM-DD.csv`
+
+## Browser Compatibility
+
+Works in all modern browsers:
+- Chrome/Edge 90+
+- Firefox 88+
+- Safari 14+
+
+## Data Storage
+
+All data is stored in browser localStorage:
+- `ey-action-items`: Action items data
+- `ey-calendar-events`: Calendar events data
+- `ey-snapshots`: Snapshot history
+
+**Note**: Data is stored locally in your browser. Clearing browser data will delete all stored information.
+
+## No Build Required ⚡
+
+This application uses **zero dependencies** and requires **no build process**. It's pure HTML, CSS, and JavaScript that runs directly in the browser.
+
+- No Node.js required (except for dev server)
+- No npm install needed
+- No compilation or transpilation
+- No framework overhead
+- No complex tooling
+- Just open and run
+
+## Why Vanilla?
+
+- **Performance**: No framework overhead, instant load times
+- **Simplicity**: Easy to understand, modify, and maintain
+- **Portability**: Works anywhere with a browser
+- **Zero Dependencies**: No security vulnerabilities from packages
+- **Future-Proof**: No framework migrations needed
+- **Learning**: Great for understanding web fundamentals
 
 ## License
 
