@@ -4,151 +4,2074 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EY AI Taskforce Tracker</title>
-    <link rel="stylesheet" href="styles.css">
+
+    <!-- Favicon: EY Yellow block -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23FFE600'/></svg>">
+
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- SheetJS for Excel export -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+
+    <style>
+        /* ============================================
+           CSS STYLES - EY AI Taskforce Tracker
+           ============================================ */
+
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Aptos", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background-color: #F7FAFC;
+            color: #1A1A1A;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Header Styles */
+        .header {
+            background-color: #FFFFFF;
+            border-bottom: 3px solid #FFE600;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .header-left {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .header-accent {
+            width: 6px;
+            height: 50px;
+            background-color: #FFE600;
+            border-radius: 2px;
+        }
+
+        .header-titles {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .header-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #000000;
+            letter-spacing: -0.02em;
+        }
+
+        .header-subtitle {
+            font-size: 0.95rem;
+            font-weight: 400;
+            color: #718096;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        /* Button Styles */
+        .btn {
+            padding: 0.75rem 1.25rem;
+            border: none;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            white-space: nowrap;
+        }
+
+        .btn:focus {
+            outline: 2px solid #FFE600;
+            outline-offset: 2px;
+        }
+
+        .btn-primary {
+            background-color: #FFE600;
+            color: #000000;
+            border: 2px solid #FFE600;
+        }
+
+        .btn-primary:hover {
+            background-color: #FFD700;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(255, 230, 0, 0.3);
+        }
+
+        .btn-secondary {
+            background-color: #FFFFFF;
+            color: #2D3748;
+            border: 2px solid #E2E8F0;
+        }
+
+        .btn-secondary:hover {
+            background-color: #F7FAFC;
+            border-color: #CBD5E0;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .btn-danger {
+            background-color: #E53E3E;
+            color: #FFFFFF;
+            border: 2px solid #E53E3E;
+        }
+
+        .btn-danger:hover {
+            background-color: #C53030;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(229, 62, 62, 0.3);
+        }
+
+        .btn-sm {
+            padding: 0.5rem 0.875rem;
+            font-size: 0.85rem;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Tab Navigation */
+        .tab-bar {
+            background-color: #FFFFFF;
+            border-bottom: 1px solid #E2E8F0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .tab-nav {
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            gap: 2rem;
+        }
+
+        .tab-button {
+            padding: 1rem 0;
+            background: none;
+            border: none;
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #718096;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        .tab-button:hover {
+            color: #2D3748;
+        }
+
+        .tab-button.active {
+            color: #000000;
+            font-weight: 700;
+        }
+
+        .tab-button.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background-color: #FFE600;
+            animation: slideIn 0.2s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: scaleX(0);
+            }
+            to {
+                transform: scaleX(1);
+            }
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Action Items Table Section */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #000000;
+        }
+
+        .table-controls {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            padding: 0.625rem 1rem;
+            border: 2px solid #E2E8F0;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            width: 250px;
+            transition: border-color 0.2s ease;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #FFE600;
+        }
+
+        .filter-select {
+            padding: 0.625rem 1rem;
+            border: 2px solid #E2E8F0;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            background-color: #FFFFFF;
+            cursor: pointer;
+            transition: border-color 0.2s ease;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: #FFE600;
+        }
+
+        /* Table Styles */
+        .table-wrapper {
+            background-color: #FFFFFF;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        .action-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .action-table thead {
+            background-color: #F7FAFC;
+            border-bottom: 2px solid #FFE600;
+        }
+
+        .action-table th {
+            padding: 1rem;
+            text-align: left;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #4A5568;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            white-space: nowrap;
+            cursor: pointer;
+            user-select: none;
+            position: sticky;
+            top: 0;
+            background-color: #F7FAFC;
+            z-index: 10;
+        }
+
+        .action-table th:hover {
+            background-color: #EDF2F7;
+        }
+
+        .action-table th i {
+            margin-left: 0.5rem;
+            opacity: 0.4;
+            font-size: 0.7rem;
+        }
+
+        .action-table th.sorted i {
+            opacity: 1;
+            color: #FFE600;
+        }
+
+        .action-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #E2E8F0;
+            font-size: 0.9rem;
+            color: #2D3748;
+        }
+
+        .action-table tbody tr {
+            transition: background-color 0.15s ease;
+        }
+
+        .action-table tbody tr:hover {
+            background-color: #F7FAFC;
+        }
+
+        .action-table input[type="text"],
+        .action-table input[type="date"],
+        .action-table textarea,
+        .action-table select {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #E2E8F0;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 0.875rem;
+            transition: border-color 0.2s ease;
+        }
+
+        .action-table input:focus,
+        .action-table textarea:focus,
+        .action-table select:focus {
+            outline: none;
+            border-color: #FFE600;
+            background-color: #FFFEF0;
+        }
+
+        .action-table textarea {
+            min-height: 60px;
+            resize: vertical;
+        }
+
+        /* Status Pills */
+        .status-pill {
+            display: inline-block;
+            padding: 0.375rem 0.875rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .status-pill:hover {
+            transform: scale(1.05);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        }
+
+        .status-not-started {
+            background-color: #E2E8F0;
+            color: #4A5568;
+        }
+
+        .status-in-progress {
+            background-color: #FED7AA;
+            color: #C05621;
+        }
+
+        .status-blocked {
+            background-color: #FED7D7;
+            color: #C53030;
+        }
+
+        .status-done {
+            background-color: #C6F6D5;
+            color: #22543D;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            margin-top: 0.25rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background-color: #E2E8F0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: #48BB78;
+            transition: width 0.3s ease, background-color 0.3s ease;
+            border-radius: 4px;
+        }
+
+        .progress-fill.in-progress {
+            background-color: #ED8936;
+        }
+
+        .progress-fill.blocked {
+            background-color: #E53E3E;
+        }
+
+        .progress-text {
+            font-size: 0.75rem;
+            color: #718096;
+            margin-top: 0.25rem;
+        }
+
+        /* Priority Indicator */
+        .priority-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+
+        .priority-high {
+            background-color: #E53E3E;
+        }
+
+        .priority-medium {
+            background-color: #ED8936;
+        }
+
+        .priority-low {
+            background-color: #48BB78;
+        }
+
+        /* Calendar & Events Tab */
+        .calendar-section {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 2rem;
+        }
+
+        @media (max-width: 1200px) {
+            .calendar-section {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .calendar-container {
+            background-color: #FFFFFF;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            padding: 2rem;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .calendar-month-nav {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .calendar-month-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #000000;
+            min-width: 220px;
+            text-align: center;
+        }
+
+        .calendar-nav-btn {
+            background: none;
+            border: 2px solid #E2E8F0;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #4A5568;
+        }
+
+        .calendar-nav-btn:hover {
+            border-color: #FFE600;
+            background-color: #FFFEF0;
+            color: #000000;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem;
+        }
+
+        .calendar-day-header {
+            text-align: center;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #718096;
+            padding: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            border: 2px solid transparent;
+        }
+
+        .calendar-day:hover {
+            background-color: #F7FAFC;
+            border-color: #E2E8F0;
+        }
+
+        .calendar-day.other-month {
+            color: #CBD5E0;
+        }
+
+        .calendar-day.today {
+            background-color: #FFE600;
+            color: #000000;
+            font-weight: 700;
+            border-color: #FFE600;
+        }
+
+        .calendar-day.has-events {
+            background-color: #EDF2F7;
+            font-weight: 600;
+        }
+
+        .calendar-day.has-events::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 6px;
+            height: 6px;
+            background-color: #4299E1;
+            border-radius: 50%;
+        }
+
+        .calendar-day.today.has-events::after {
+            background-color: #000000;
+        }
+
+        /* Events List */
+        .events-container {
+            background-color: #FFFFFF;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            padding: 2rem;
+        }
+
+        .events-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .events-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #000000;
+        }
+
+        .events-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .event-card {
+            padding: 1.25rem;
+            background-color: #F7FAFC;
+            border-radius: 8px;
+            border: 2px solid #E2E8F0;
+            transition: all 0.2s ease;
+        }
+
+        .event-card:hover {
+            border-color: #CBD5E0;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .event-card-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .event-icon {
+            width: 36px;
+            height: 36px;
+            background-color: #4299E1;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #FFFFFF;
+            flex-shrink: 0;
+        }
+
+        .event-details {
+            flex: 1;
+        }
+
+        .event-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #000000;
+            margin-bottom: 0.25rem;
+        }
+
+        .event-date {
+            font-size: 0.85rem;
+            color: #718096;
+        }
+
+        .event-description {
+            font-size: 0.9rem;
+            color: #4A5568;
+            line-height: 1.5;
+            margin-bottom: 0.75rem;
+        }
+
+        .event-category {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background-color: #FFFFFF;
+            border: 1px solid #E2E8F0;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #4A5568;
+        }
+
+        .no-events {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #A0AEC0;
+            font-style: italic;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: #FFFFFF;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            padding: 1.5rem 2rem;
+            border-bottom: 2px solid #E2E8F0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #000000;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #718096;
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .modal-close:hover {
+            background-color: #F7FAFC;
+            color: #000000;
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #2D3748;
+        }
+
+        .form-input,
+        .form-textarea,
+        .form-select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #E2E8F0;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: border-color 0.2s ease;
+        }
+
+        .form-input:focus,
+        .form-textarea:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: #FFE600;
+            background-color: #FFFEF0;
+        }
+
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            padding: 1.5rem 2rem;
+            border-top: 2px solid #E2E8F0;
+        }
+
+        /* Snapshot Panel */
+        .snapshot-panel {
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 450px;
+            background: #FFFFFF;
+            box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .snapshot-panel.active {
+            transform: translateX(0);
+        }
+
+        .snapshot-panel-header {
+            padding: 2rem;
+            border-bottom: 2px solid #E2E8F0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .snapshot-panel-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #000000;
+        }
+
+        .snapshot-panel-body {
+            padding: 2rem;
+            overflow-y: auto;
+            height: calc(100vh - 120px);
+        }
+
+        .snapshot-item {
+            padding: 1.5rem;
+            background-color: #F7FAFC;
+            border: 2px solid #E2E8F0;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        .snapshot-item:hover {
+            border-color: #CBD5E0;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .snapshot-name {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #000000;
+            margin-bottom: 0.5rem;
+        }
+
+        .snapshot-meta {
+            font-size: 0.85rem;
+            color: #718096;
+            margin-bottom: 1rem;
+        }
+
+        .snapshot-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .no-snapshots {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #A0AEC0;
+            font-style: italic;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background-color: #2D3748;
+            color: #FFFFFF;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            min-width: 300px;
+            transform: translateY(150%);
+            transition: transform 0.3s ease;
+        }
+
+        .toast.active {
+            transform: translateY(0);
+        }
+
+        .toast-icon {
+            font-size: 1.25rem;
+        }
+
+        .toast-message {
+            flex: 1;
+            font-size: 0.95rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .header-actions {
+                width: 100%;
+                justify-content: flex-start;
+            }
+
+            .snapshot-panel {
+                width: 100%;
+            }
+
+            .table-wrapper {
+                overflow-x: auto;
+            }
+
+            .calendar-section {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Utility Classes */
+        .hidden {
+            display: none !important;
+        }
+
+        .text-truncate {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+    </style>
 </head>
 <body>
     <!-- Header -->
     <header class="header">
         <div class="header-content">
             <div class="header-left">
-                <h1 class="header-title">EY AI Taskforce Tracker</h1>
-                <span class="header-subtitle">Enterprise Project Management</span>
+                <div class="header-accent"></div>
+                <div class="header-titles">
+                    <h1 class="header-title">EY AI Taskforce</h1>
+                    <p class="header-subtitle">Action Items & Initiative Tracker</p>
+                </div>
             </div>
             <div class="header-actions">
                 <button class="btn btn-secondary" id="saveSnapshotBtn">
-                    <span>💾</span> Save Snapshot
+                    <i class="fas fa-camera"></i>
+                    Save Snapshot
                 </button>
-                <button class="btn btn-secondary" id="exportCsvBtn">
-                    <span>📊</span> Export CSV
+                <button class="btn btn-secondary" id="exportExcelBtn">
+                    <i class="fas fa-file-excel"></i>
+                    Export to Excel
                 </button>
                 <button class="btn btn-secondary" id="viewHistoryBtn">
-                    <span>📜</span> History
+                    <i class="fas fa-history"></i>
+                    View Snapshot History
                 </button>
             </div>
         </div>
     </header>
 
-    <!-- Snapshot History Panel -->
-    <div id="snapshotPanel" class="snapshot-panel hidden">
-        <div class="snapshot-panel-content">
-            <div class="snapshot-panel-header">
-                <h2>Snapshot History</h2>
-                <button class="btn-close" id="closeSnapshotBtn">&times;</button>
-            </div>
-            <div class="snapshot-list" id="snapshotList">
-                <!-- Snapshots will be inserted here -->
-            </div>
+    <!-- Tab Navigation -->
+    <div class="tab-bar">
+        <div class="tab-nav">
+            <button class="tab-button active" data-tab="action-items">
+                Action Items
+            </button>
+            <button class="tab-button" data-tab="calendar-events">
+                Calendar & Events
+            </button>
         </div>
     </div>
 
     <!-- Main Content -->
     <main class="main-content">
-        <div class="container">
-            <!-- Action Items Table -->
-            <div class="table-section">
-                <div class="table-header">
-                    <h2>Action Items</h2>
-                    <button class="btn btn-primary" id="addItemBtn">+ Add Item</button>
-                </div>
-
-                <div class="table-wrapper">
-                    <table class="action-table" id="actionTable">
-                        <thead>
-                            <tr>
-                                <th class="sortable" data-sort="description">
-                                    Description <span class="sort-icon">↕</span>
-                                </th>
-                                <th class="sortable" data-sort="owner">
-                                    Owner <span class="sort-icon">↕</span>
-                                </th>
-                                <th class="sortable" data-sort="date">
-                                    Due Date <span class="sort-icon">↕</span>
-                                </th>
-                                <th class="sortable" data-sort="status">
-                                    Status <span class="sort-icon">↕</span>
-                                </th>
-                                <th class="sortable" data-sort="priority">
-                                    Priority <span class="sort-icon">↕</span>
-                                </th>
-                                <th class="sortable" data-sort="section">
-                                    Section <span class="sort-icon">↕</span>
-                                </th>
-                                <th>Progress</th>
-                                <th>Notes</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="actionTableBody">
-                            <!-- Rows will be inserted here -->
-                        </tbody>
-                    </table>
+        <!-- Action Items Tab -->
+        <div id="action-items" class="tab-content active">
+            <div class="section-header">
+                <h2 class="section-title">Action Items</h2>
+                <div class="table-controls">
+                    <input type="text" class="search-box" id="searchBox" placeholder="Search action items...">
+                    <select class="filter-select" id="statusFilter">
+                        <option value="">All Statuses</option>
+                        <option value="Not Started">Not Started</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Blocked">Blocked</option>
+                        <option value="Done">Done</option>
+                    </select>
+                    <button class="btn btn-primary" id="addItemBtn">
+                        <i class="fas fa-plus"></i>
+                        Add Action Item
+                    </button>
                 </div>
             </div>
 
-            <!-- Calendar Sidebar -->
-            <div class="calendar-sidebar">
-                <div class="calendar-header">
-                    <h2>Calendar Events</h2>
-                    <button class="btn btn-primary btn-sm" id="addEventBtn">+ Add Event</button>
+            <div class="table-wrapper">
+                <table class="action-table">
+                    <thead>
+                        <tr>
+                            <th data-sort="description">Task Name / Description <i class="fas fa-sort"></i></th>
+                            <th data-sort="owner">Owner <i class="fas fa-sort"></i></th>
+                            <th data-sort="taskforce">Taskforce <i class="fas fa-sort"></i></th>
+                            <th data-sort="date">Date <i class="fas fa-sort"></i></th>
+                            <th data-sort="status">Status <i class="fas fa-sort"></i></th>
+                            <th data-sort="progress">Progress <i class="fas fa-sort"></i></th>
+                            <th>Notes</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="actionTableBody">
+                        <!-- Table rows will be inserted here by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Calendar & Events Tab -->
+        <div id="calendar-events" class="tab-content">
+            <div class="calendar-section">
+                <div class="calendar-container">
+                    <div class="calendar-header">
+                        <div class="calendar-month-nav">
+                            <button class="calendar-nav-btn" id="prevMonthBtn">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <h3 class="calendar-month-title" id="calendarMonthTitle">December 2025</h3>
+                            <button class="calendar-nav-btn" id="nextMonthBtn">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                        <button class="btn btn-primary btn-sm" id="todayBtn">
+                            <i class="fas fa-calendar-day"></i>
+                            Today
+                        </button>
+                    </div>
+                    <div class="calendar-grid" id="calendarGrid">
+                        <!-- Calendar will be rendered here -->
+                    </div>
                 </div>
 
-                <div class="mini-calendar" id="miniCalendar">
-                    <!-- Mini calendar will be rendered here -->
-                </div>
-
-                <div class="events-list" id="eventsList">
-                    <!-- Events will be inserted here -->
+                <div class="events-container">
+                    <div class="events-header">
+                        <h3 class="events-title">Upcoming Events</h3>
+                        <button class="btn btn-primary btn-sm" id="addEventBtn">
+                            <i class="fas fa-plus"></i>
+                            Add Event
+                        </button>
+                    </div>
+                    <div class="events-list" id="eventsList">
+                        <!-- Events will be rendered here -->
+                    </div>
                 </div>
             </div>
         </div>
     </main>
 
-    <!-- Add Event Modal -->
-    <div id="addEventModal" class="modal hidden">
+    <!-- Add/Edit Action Item Modal -->
+    <div class="modal-overlay" id="itemModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Add Calendar Event</h2>
-                <button class="btn-close" id="closeEventModalBtn">&times;</button>
+                <h2 class="modal-title" id="itemModalTitle">Add Action Item</h2>
+                <button class="modal-close" id="closeItemModal">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
-            <form id="addEventForm">
-                <div class="form-group">
-                    <label for="eventTitle">Event Title</label>
-                    <input type="text" id="eventTitle" required>
-                </div>
-                <div class="form-group">
-                    <label for="eventDate">Date</label>
-                    <input type="date" id="eventDate" required>
-                </div>
-                <div class="form-group">
-                    <label for="eventDescription">Description</label>
-                    <textarea id="eventDescription" rows="3"></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="eventCategory">Category</label>
-                    <select id="eventCategory">
-                        <option value="Meeting">Meeting</option>
-                        <option value="Deadline">Deadline</option>
-                        <option value="Review">Review</option>
-                        <option value="Other">Other</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="eventColor">Color</label>
-                    <input type="color" id="eventColor" value="#4299E1">
-                </div>
-                <div class="modal-actions">
-                    <button type="button" class="btn btn-secondary" id="cancelEventBtn">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Add Event</button>
-                </div>
-            </form>
+            <div class="modal-body">
+                <form id="itemForm">
+                    <div class="form-group">
+                        <label class="form-label" for="itemDescription">Task Name / Description</label>
+                        <input type="text" class="form-input" id="itemDescription" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="itemOwner">Owner</label>
+                        <input type="text" class="form-input" id="itemOwner" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="itemTaskforce">Taskforce Members (comma-separated)</label>
+                        <input type="text" class="form-input" id="itemTaskforce" placeholder="John Doe, Jane Smith">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="itemDate">Due Date</label>
+                        <input type="date" class="form-input" id="itemDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="itemStatus">Status</label>
+                        <select class="form-select" id="itemStatus">
+                            <option value="Not Started">Not Started</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Blocked">Blocked</option>
+                            <option value="Done">Done</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="itemProgress">Progress (%)</label>
+                        <input type="number" class="form-input" id="itemProgress" min="0" max="100" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="itemNotes">Notes</label>
+                        <textarea class="form-textarea" id="itemNotes"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" id="cancelItemBtn">Cancel</button>
+                <button class="btn btn-primary" id="saveItemBtn">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Event Modal -->
+    <div class="modal-overlay" id="eventModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Add Calendar Event</h2>
+                <button class="modal-close" id="closeEventModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="eventForm">
+                    <div class="form-group">
+                        <label class="form-label" for="eventTitle">Event Title</label>
+                        <input type="text" class="form-input" id="eventTitle" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="eventDate">Date</label>
+                        <input type="date" class="form-input" id="eventDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="eventCategory">Category</label>
+                        <select class="form-select" id="eventCategory">
+                            <option value="Meeting">Meeting</option>
+                            <option value="Deadline">Deadline</option>
+                            <option value="Review">Review</option>
+                            <option value="Workshop">Workshop</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="eventDescription">Description</label>
+                        <textarea class="form-textarea" id="eventDescription"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" id="cancelEventBtn">Cancel</button>
+                <button class="btn btn-primary" id="saveEventBtn">Add Event</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal-overlay" id="deleteModal">
+        <div class="modal-content" style="max-width: 450px;">
+            <div class="modal-header">
+                <h2 class="modal-title">Confirm Deletion</h2>
+                <button class="modal-close" id="closeDeleteModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p id="deleteMessage" style="font-size: 1rem; color: #2D3748; line-height: 1.6;">
+                    Are you sure you want to delete this item? This action cannot be undone.
+                </p>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" id="cancelDeleteBtn">Cancel</button>
+                <button class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Snapshot Panel -->
+    <div class="snapshot-panel" id="snapshotPanel">
+        <div class="snapshot-panel-header">
+            <h2 class="snapshot-panel-title">Snapshot History</h2>
+            <button class="modal-close" id="closeSnapshotPanel">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="snapshot-panel-body" id="snapshotPanelBody">
+            <!-- Snapshots will be rendered here -->
         </div>
     </div>
 
     <!-- Toast Notification -->
-    <div id="toast" class="toast hidden">
-        <span id="toastMessage"></span>
+    <div class="toast" id="toast">
+        <i class="fas fa-check-circle toast-icon"></i>
+        <span class="toast-message" id="toastMessage"></span>
     </div>
 
-    <script src="app.js"></script>
+    <script>
+        // ============================================
+        // JAVASCRIPT - EY AI Taskforce Tracker
+        // ============================================
+
+        // Application State
+        let actionItems = [];
+        let calendarEvents = [];
+        let snapshots = [];
+        let currentSort = { field: null, direction: 'asc' };
+        let currentMonth = new Date();
+        let editingItemId = null;
+        let deleteCallback = null;
+
+        // Initial seed data (professional and realistic)
+        const seedActionItems = [
+            {
+                id: 'item-1',
+                description: 'Define AI implementation roadmap for Q1 2026',
+                owner: 'Sarah Chen',
+                taskforce: 'Sarah Chen, Michael Brooks',
+                date: '2025-12-20',
+                status: 'In Progress',
+                progress: 65,
+                notes: 'Stakeholder alignment meeting scheduled for next week. Draft roadmap under review.',
+                lastUpdated: new Date().toISOString()
+            },
+            {
+                id: 'item-2',
+                description: 'Complete vendor evaluation for AI platform selection',
+                owner: 'Michael Brooks',
+                taskforce: 'Michael Brooks, Emily Watson',
+                date: '2025-12-18',
+                status: 'Done',
+                progress: 100,
+                notes: 'Final report submitted. Recommendation: Azure OpenAI for initial POC.',
+                lastUpdated: new Date().toISOString()
+            },
+            {
+                id: 'item-3',
+                description: 'Develop proof of concept for document automation',
+                owner: 'Emily Watson',
+                taskforce: 'Emily Watson, David Lee, Sarah Chen',
+                date: '2026-01-15',
+                status: 'Not Started',
+                progress: 0,
+                notes: 'Pending approval from steering committee. Budget allocated.',
+                lastUpdated: new Date().toISOString()
+            }
+        ];
+
+        const seedEvents = [
+            {
+                id: 'event-1',
+                title: 'AI Taskforce Steering Committee Meeting',
+                date: '2025-12-15',
+                category: 'Meeting',
+                description: 'Quarterly review of AI initiatives, budget discussion, and Q1 planning.'
+            },
+            {
+                id: 'event-2',
+                title: 'POC Presentation to Leadership',
+                date: '2026-01-15',
+                category: 'Deadline',
+                description: 'Final presentation of document automation proof of concept to executive leadership.'
+            },
+            {
+                id: 'event-3',
+                title: 'AI Ethics & Governance Workshop',
+                date: '2025-12-22',
+                category: 'Workshop',
+                description: 'All-hands workshop on responsible AI principles and compliance framework.'
+            }
+        ];
+
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+
+        function initializeApp() {
+            // Load data from localStorage or use seed data
+            actionItems = loadFromStorage('ey-action-items', seedActionItems);
+            calendarEvents = loadFromStorage('ey-calendar-events', seedEvents);
+            snapshots = loadFromStorage('ey-snapshots', []);
+
+            // Render initial views
+            renderActionItems();
+            renderCalendar();
+            renderEvents();
+
+            // Attach event listeners
+            attachEventListeners();
+        }
+
+        // ============================================
+        // DATA PERSISTENCE
+        // ============================================
+
+        function loadFromStorage(key, defaultValue) {
+            try {
+                const stored = localStorage.getItem(key);
+                return stored ? JSON.parse(stored) : defaultValue;
+            } catch (e) {
+                console.error('Error loading from storage:', e);
+                return defaultValue;
+            }
+        }
+
+        function saveToStorage(key, value) {
+            try {
+                localStorage.setItem(key, JSON.stringify(value));
+            } catch (e) {
+                console.error('Error saving to storage:', e);
+                showToast('Error saving data', 'error');
+            }
+        }
+
+        // ============================================
+        // TAB NAVIGATION
+        // ============================================
+
+        function switchTab(tabId) {
+            // Update tab buttons
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
+
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(tabId).classList.add('active');
+
+            // Re-render calendar if switching to that tab
+            if (tabId === 'calendar-events') {
+                renderCalendar();
+                renderEvents();
+            }
+        }
+
+        // ============================================
+        // ACTION ITEMS - RENDERING
+        // ============================================
+
+        function renderActionItems() {
+            const tbody = document.getElementById('actionTableBody');
+            const searchTerm = document.getElementById('searchBox').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
+
+            // Filter items
+            let filteredItems = actionItems.filter(item => {
+                const matchesSearch = !searchTerm ||
+                    item.description.toLowerCase().includes(searchTerm) ||
+                    item.owner.toLowerCase().includes(searchTerm) ||
+                    item.notes.toLowerCase().includes(searchTerm);
+                const matchesStatus = !statusFilter || item.status === statusFilter;
+                return matchesSearch && matchesStatus;
+            });
+
+            // Clear table
+            tbody.innerHTML = '';
+
+            if (filteredItems.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: 3rem; color: #A0AEC0; font-style: italic;">
+                            No action items found. Click "Add Action Item" to get started.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            // Render each item
+            filteredItems.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>
+                        <div style="max-width: 300px;">
+                            <div class="text-truncate" style="font-weight: 600;">${escapeHtml(item.description)}</div>
+                        </div>
+                    </td>
+                    <td>${escapeHtml(item.owner)}</td>
+                    <td>${escapeHtml(item.taskforce)}</td>
+                    <td style="white-space: nowrap;">${formatDate(item.date)}</td>
+                    <td>
+                        <span class="status-pill status-${item.status.toLowerCase().replace(' ', '-')}"
+                              onclick="openStatusMenu('${item.id}', event)">
+                            ${item.status}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="progress-container">
+                            <div class="progress-bar">
+                                <div class="progress-fill ${getProgressClass(item.status)}"
+                                     style="width: ${item.progress}%"></div>
+                            </div>
+                            <div class="progress-text">${item.progress}%</div>
+                        </div>
+                    </td>
+                    <td>
+                        <div style="max-width: 200px;" class="text-truncate" title="${escapeHtml(item.notes)}">
+                            ${escapeHtml(item.notes) || '<em style="color: #A0AEC0;">No notes</em>'}
+                        </div>
+                    </td>
+                    <td>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button class="btn btn-secondary btn-sm" onclick="editItem('${item.id}')" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteItem('${item.id}')" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function getProgressClass(status) {
+            if (status === 'Blocked') return 'blocked';
+            if (status === 'In Progress') return 'in-progress';
+            return '';
+        }
+
+        // ============================================
+        // ACTION ITEMS - ADD/EDIT
+        // ============================================
+
+        function openAddItemModal() {
+            editingItemId = null;
+            document.getElementById('itemModalTitle').textContent = 'Add Action Item';
+            document.getElementById('itemForm').reset();
+            document.getElementById('itemDate').valueAsDate = new Date();
+            openModal('itemModal');
+        }
+
+        function editItem(id) {
+            const item = actionItems.find(i => i.id === id);
+            if (!item) return;
+
+            editingItemId = id;
+            document.getElementById('itemModalTitle').textContent = 'Edit Action Item';
+            document.getElementById('itemDescription').value = item.description;
+            document.getElementById('itemOwner').value = item.owner;
+            document.getElementById('itemTaskforce').value = item.taskforce;
+            document.getElementById('itemDate').value = item.date;
+            document.getElementById('itemStatus').value = item.status;
+            document.getElementById('itemProgress').value = item.progress;
+            document.getElementById('itemNotes').value = item.notes;
+            openModal('itemModal');
+        }
+
+        function saveItem() {
+            const description = document.getElementById('itemDescription').value.trim();
+            const owner = document.getElementById('itemOwner').value.trim();
+            const taskforce = document.getElementById('itemTaskforce').value.trim();
+            const date = document.getElementById('itemDate').value;
+            const status = document.getElementById('itemStatus').value;
+            const progress = parseInt(document.getElementById('itemProgress').value);
+            const notes = document.getElementById('itemNotes').value.trim();
+
+            if (!description || !owner || !date) {
+                showToast('Please fill in all required fields', 'error');
+                return;
+            }
+
+            if (editingItemId) {
+                // Update existing item
+                const index = actionItems.findIndex(i => i.id === editingItemId);
+                if (index !== -1) {
+                    actionItems[index] = {
+                        ...actionItems[index],
+                        description,
+                        owner,
+                        taskforce,
+                        date,
+                        status,
+                        progress,
+                        notes,
+                        lastUpdated: new Date().toISOString()
+                    };
+                    showToast('Action item updated successfully');
+                }
+            } else {
+                // Add new item
+                const newItem = {
+                    id: `item-${Date.now()}`,
+                    description,
+                    owner,
+                    taskforce,
+                    date,
+                    status,
+                    progress,
+                    notes,
+                    lastUpdated: new Date().toISOString()
+                };
+                actionItems.unshift(newItem);
+                showToast('Action item added successfully');
+            }
+
+            saveToStorage('ey-action-items', actionItems);
+            renderActionItems();
+            closeModal('itemModal');
+        }
+
+        // ============================================
+        // ACTION ITEMS - DELETE
+        // ============================================
+
+        function deleteItem(id) {
+            const item = actionItems.find(i => i.id === id);
+            if (!item) return;
+
+            document.getElementById('deleteMessage').textContent =
+                `Are you sure you want to delete "${item.description}"? This action cannot be undone.`;
+
+            deleteCallback = () => {
+                actionItems = actionItems.filter(i => i.id !== id);
+                saveToStorage('ey-action-items', actionItems);
+                renderActionItems();
+                showToast('Action item deleted');
+                closeModal('deleteModal');
+            };
+
+            openModal('deleteModal');
+        }
+
+        // ============================================
+        // ACTION ITEMS - SORTING
+        // ============================================
+
+        function sortActionItems(field) {
+            if (currentSort.field === field) {
+                currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSort.field = field;
+                currentSort.direction = 'asc';
+            }
+
+            actionItems.sort((a, b) => {
+                let aVal = a[field];
+                let bVal = b[field];
+
+                if (field === 'date') {
+                    aVal = new Date(aVal);
+                    bVal = new Date(bVal);
+                } else if (field === 'progress') {
+                    aVal = parseInt(aVal);
+                    bVal = parseInt(bVal);
+                } else if (typeof aVal === 'string') {
+                    aVal = aVal.toLowerCase();
+                    bVal = bVal.toLowerCase();
+                }
+
+                if (aVal < bVal) return currentSort.direction === 'asc' ? -1 : 1;
+                if (aVal > bVal) return currentSort.direction === 'asc' ? 1 : -1;
+                return 0;
+            });
+
+            updateSortIcons();
+            renderActionItems();
+        }
+
+        function updateSortIcons() {
+            document.querySelectorAll('.action-table th[data-sort]').forEach(th => {
+                th.classList.remove('sorted');
+                const icon = th.querySelector('i');
+                icon.className = 'fas fa-sort';
+            });
+
+            if (currentSort.field) {
+                const sortedTh = document.querySelector(`th[data-sort="${currentSort.field}"]`);
+                if (sortedTh) {
+                    sortedTh.classList.add('sorted');
+                    const icon = sortedTh.querySelector('i');
+                    icon.className = currentSort.direction === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down';
+                }
+            }
+        }
+
+        // ============================================
+        // CALENDAR - RENDERING
+        // ============================================
+
+        function renderCalendar() {
+            const grid = document.getElementById('calendarGrid');
+            const year = currentMonth.getFullYear();
+            const month = currentMonth.getMonth();
+
+            // Update month title
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                'July', 'August', 'September', 'October', 'November', 'December'];
+            document.getElementById('calendarMonthTitle').textContent = `${monthNames[month]} ${year}`;
+
+            // Clear grid
+            grid.innerHTML = '';
+
+            // Add day headers
+            const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            dayHeaders.forEach(day => {
+                const header = document.createElement('div');
+                header.className = 'calendar-day-header';
+                header.textContent = day;
+                grid.appendChild(header);
+            });
+
+            // Calculate calendar days
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const daysInPrevMonth = new Date(year, month, 0).getDate();
+
+            const today = new Date();
+            const todayStr = formatDateISO(today);
+
+            // Previous month days
+            for (let i = firstDay - 1; i >= 0; i--) {
+                const day = daysInPrevMonth - i;
+                const dayEl = document.createElement('div');
+                dayEl.className = 'calendar-day other-month';
+                dayEl.textContent = day;
+                grid.appendChild(dayEl);
+            }
+
+            // Current month days
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(year, month, day);
+                const dateStr = formatDateISO(date);
+                const dayEl = document.createElement('div');
+                dayEl.className = 'calendar-day';
+
+                if (dateStr === todayStr) {
+                    dayEl.classList.add('today');
+                }
+
+                const hasEvents = calendarEvents.some(e => e.date === dateStr);
+                if (hasEvents) {
+                    dayEl.classList.add('has-events');
+                }
+
+                dayEl.textContent = day;
+                grid.appendChild(dayEl);
+            }
+
+            // Next month days
+            const totalCells = grid.children.length - 7; // Subtract day headers
+            const remainingCells = 42 - totalCells; // 6 rows * 7 days
+            for (let day = 1; day <= remainingCells; day++) {
+                const dayEl = document.createElement('div');
+                dayEl.className = 'calendar-day other-month';
+                dayEl.textContent = day;
+                grid.appendChild(dayEl);
+            }
+        }
+
+        function navigateMonth(direction) {
+            currentMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + direction, 1);
+            renderCalendar();
+        }
+
+        function goToToday() {
+            currentMonth = new Date();
+            renderCalendar();
+        }
+
+        // ============================================
+        // EVENTS - RENDERING
+        // ============================================
+
+        function renderEvents() {
+            const eventsList = document.getElementById('eventsList');
+
+            if (calendarEvents.length === 0) {
+                eventsList.innerHTML = '<div class="no-events">No upcoming events scheduled</div>';
+                return;
+            }
+
+            // Sort events by date
+            const sortedEvents = [...calendarEvents].sort((a, b) =>
+                new Date(a.date) - new Date(b.date)
+            );
+
+            eventsList.innerHTML = '';
+
+            sortedEvents.forEach(event => {
+                const eventCard = document.createElement('div');
+                eventCard.className = 'event-card';
+
+                const iconClass = getEventIconClass(event.category);
+
+                eventCard.innerHTML = `
+                    <div class="event-card-header">
+                        <div class="event-icon">
+                            <i class="${iconClass}"></i>
+                        </div>
+                        <div class="event-details">
+                            <div class="event-title">${escapeHtml(event.title)}</div>
+                            <div class="event-date">${formatDateLong(event.date)}</div>
+                        </div>
+                    </div>
+                    <div class="event-description">${escapeHtml(event.description)}</div>
+                    <span class="event-category">${event.category}</span>
+                `;
+
+                eventsList.appendChild(eventCard);
+            });
+        }
+
+        function getEventIconClass(category) {
+            const iconMap = {
+                'Meeting': 'fas fa-users',
+                'Deadline': 'fas fa-flag-checkered',
+                'Review': 'fas fa-clipboard-check',
+                'Workshop': 'fas fa-chalkboard-teacher',
+                'Other': 'fas fa-calendar'
+            };
+            return iconMap[category] || 'fas fa-calendar';
+        }
+
+        // ============================================
+        // EVENTS - ADD
+        // ============================================
+
+        function openAddEventModal() {
+            document.getElementById('eventForm').reset();
+            document.getElementById('eventDate').valueAsDate = new Date();
+            openModal('eventModal');
+        }
+
+        function saveEvent() {
+            const title = document.getElementById('eventTitle').value.trim();
+            const date = document.getElementById('eventDate').value;
+            const category = document.getElementById('eventCategory').value;
+            const description = document.getElementById('eventDescription').value.trim();
+
+            if (!title || !date) {
+                showToast('Please fill in all required fields', 'error');
+                return;
+            }
+
+            const newEvent = {
+                id: `event-${Date.now()}`,
+                title,
+                date,
+                category,
+                description
+            };
+
+            calendarEvents.push(newEvent);
+            saveToStorage('ey-calendar-events', calendarEvents);
+            renderCalendar();
+            renderEvents();
+            showToast('Event added successfully');
+            closeModal('eventModal');
+        }
+
+        // ============================================
+        // SNAPSHOTS
+        // ============================================
+
+        function saveSnapshot() {
+            const timestamp = new Date();
+            const snapshot = {
+                id: `snapshot-${Date.now()}`,
+                name: `Snapshot – ${timestamp.toLocaleString('en-US', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                })}`,
+                timestamp: timestamp.toISOString(),
+                itemsCount: actionItems.length,
+                eventsCount: calendarEvents.length,
+                actionItems: JSON.parse(JSON.stringify(actionItems)),
+                calendarEvents: JSON.parse(JSON.stringify(calendarEvents))
+            };
+
+            snapshots.unshift(snapshot);
+            saveToStorage('ey-snapshots', snapshots);
+            showToast('Snapshot saved successfully');
+        }
+
+        function openSnapshotHistory() {
+            const panel = document.getElementById('snapshotPanel');
+            const body = document.getElementById('snapshotPanelBody');
+
+            if (snapshots.length === 0) {
+                body.innerHTML = '<div class="no-snapshots">No snapshots saved yet</div>';
+            } else {
+                body.innerHTML = '';
+                snapshots.forEach(snapshot => {
+                    const item = document.createElement('div');
+                    item.className = 'snapshot-item';
+                    item.innerHTML = `
+                        <div class="snapshot-name">${escapeHtml(snapshot.name)}</div>
+                        <div class="snapshot-meta">
+                            ${snapshot.itemsCount} action items • ${snapshot.eventsCount} events
+                        </div>
+                        <div class="snapshot-actions">
+                            <button class="btn btn-secondary btn-sm" onclick="viewSnapshot('${snapshot.id}')">
+                                <i class="fas fa-eye"></i> View
+                            </button>
+                        </div>
+                    `;
+                    body.appendChild(item);
+                });
+            }
+
+            panel.classList.add('active');
+        }
+
+        function closeSnapshotHistory() {
+            document.getElementById('snapshotPanel').classList.remove('active');
+        }
+
+        function viewSnapshot(id) {
+            const snapshot = snapshots.find(s => s.id === id);
+            if (!snapshot) return;
+
+            // Simple read-only view (in production, this would be more sophisticated)
+            alert(`${snapshot.name}\n\nAction Items: ${snapshot.itemsCount}\nCalendar Events: ${snapshot.eventsCount}\n\nThis is a read-only snapshot view.`);
+        }
+
+        // ============================================
+        // EXCEL EXPORT
+        // ============================================
+
+        function exportToExcel() {
+            // Prepare data
+            const data = [
+                ['Task Name / Description', 'Owner', 'Taskforce', 'Due Date', 'Status', 'Progress (%)', 'Notes']
+            ];
+
+            actionItems.forEach(item => {
+                data.push([
+                    item.description,
+                    item.owner,
+                    item.taskforce,
+                    item.date,
+                    item.status,
+                    item.progress,
+                    item.notes
+                ]);
+            });
+
+            // Create worksheet
+            const ws = XLSX.utils.aoa_to_sheet(data);
+
+            // Apply styling to header row
+            const headerStyle = {
+                fill: { fgColor: { rgb: 'FFE600' } },
+                font: { bold: true, name: 'Aptos', sz: 11 },
+                alignment: { horizontal: 'center', vertical: 'center' }
+            };
+
+            // Set column widths
+            ws['!cols'] = [
+                { wch: 40 },  // Task Name
+                { wch: 20 },  // Owner
+                { wch: 30 },  // Taskforce
+                { wch: 12 },  // Date
+                { wch: 15 },  // Status
+                { wch: 12 },  // Progress
+                { wch: 40 }   // Notes
+            ];
+
+            // Create workbook
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'EY AI Taskforce');
+
+            // Generate filename with current date
+            const today = new Date();
+            const filename = `EY-AI-Taskforce-${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}.xlsx`;
+
+            // Download
+            XLSX.writeFile(wb, filename);
+
+            showToast('Excel exported successfully');
+        }
+
+        // ============================================
+        // MODAL MANAGEMENT
+        // ============================================
+
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.add('active');
+
+            // Focus first input
+            setTimeout(() => {
+                const firstInput = modal.querySelector('input, textarea, select');
+                if (firstInput) firstInput.focus();
+            }, 100);
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // ============================================
+        // TOAST NOTIFICATIONS
+        // ============================================
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const icon = toast.querySelector('.toast-icon');
+            const messageEl = document.getElementById('toastMessage');
+
+            messageEl.textContent = message;
+
+            if (type === 'error') {
+                icon.className = 'fas fa-exclamation-circle toast-icon';
+            } else {
+                icon.className = 'fas fa-check-circle toast-icon';
+            }
+
+            toast.classList.add('active');
+
+            setTimeout(() => {
+                toast.classList.remove('active');
+            }, 3000);
+        }
+
+        // ============================================
+        // EVENT LISTENERS
+        // ============================================
+
+        function attachEventListeners() {
+            // Tab navigation
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    switchTab(btn.dataset.tab);
+                });
+            });
+
+            // Header actions
+            document.getElementById('saveSnapshotBtn').addEventListener('click', saveSnapshot);
+            document.getElementById('exportExcelBtn').addEventListener('click', exportToExcel);
+            document.getElementById('viewHistoryBtn').addEventListener('click', openSnapshotHistory);
+
+            // Action items
+            document.getElementById('addItemBtn').addEventListener('click', openAddItemModal);
+            document.getElementById('searchBox').addEventListener('input', renderActionItems);
+            document.getElementById('statusFilter').addEventListener('change', renderActionItems);
+
+            // Action items modal
+            document.getElementById('saveItemBtn').addEventListener('click', saveItem);
+            document.getElementById('cancelItemBtn').addEventListener('click', () => closeModal('itemModal'));
+            document.getElementById('closeItemModal').addEventListener('click', () => closeModal('itemModal'));
+
+            // Events
+            document.getElementById('addEventBtn').addEventListener('click', openAddEventModal);
+            document.getElementById('saveEventBtn').addEventListener('click', saveEvent);
+            document.getElementById('cancelEventBtn').addEventListener('click', () => closeModal('eventModal'));
+            document.getElementById('closeEventModal').addEventListener('click', () => closeModal('eventModal'));
+
+            // Calendar navigation
+            document.getElementById('prevMonthBtn').addEventListener('click', () => navigateMonth(-1));
+            document.getElementById('nextMonthBtn').addEventListener('click', () => navigateMonth(1));
+            document.getElementById('todayBtn').addEventListener('click', goToToday);
+
+            // Delete modal
+            document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
+                if (deleteCallback) deleteCallback();
+            });
+            document.getElementById('cancelDeleteBtn').addEventListener('click', () => closeModal('deleteModal'));
+            document.getElementById('closeDeleteModal').addEventListener('click', () => closeModal('deleteModal'));
+
+            // Snapshot panel
+            document.getElementById('closeSnapshotPanel').addEventListener('click', closeSnapshotHistory);
+
+            // Table sorting
+            document.querySelectorAll('.action-table th[data-sort]').forEach(th => {
+                th.addEventListener('click', () => {
+                    sortActionItems(th.dataset.sort);
+                });
+            });
+
+            // Close modals on background click
+            document.querySelectorAll('.modal-overlay').forEach(modal => {
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        closeModal(modal.id);
+                    }
+                });
+            });
+
+            // Close modals on Escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    document.querySelectorAll('.modal-overlay.active').forEach(modal => {
+                        closeModal(modal.id);
+                    });
+                    if (document.getElementById('snapshotPanel').classList.contains('active')) {
+                        closeSnapshotHistory();
+                    }
+                }
+            });
+        }
+
+        // ============================================
+        // UTILITY FUNCTIONS
+        // ============================================
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+            });
+        }
+
+        function formatDateLong(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-US', {
+                weekday: 'long',
+                month: 'long',
+                day: 'numeric',
+                year: 'numeric'
+            });
+        }
+
+        function formatDateISO(date) {
+            return date.toISOString().split('T')[0];
+        }
+
+        // ============================================
+        // INITIALIZE APPLICATION
+        // ============================================
+
+        document.addEventListener('DOMContentLoaded', initializeApp);
+    </script>
 </body>
 </html>
