@@ -1,0 +1,142 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+
+  body {
+    @apply m-0 p-0 bg-bg-primary;
+    line-height: 1.6;
+  }
+
+  input:focus,
+  select:focus,
+  textarea:focus {
+    @apply outline-ey-yellow outline-2 outline-offset-2;
+  }
+}
+
+@layer components {
+  .table-row {
+    @apply border-b border-gray-200 transition-colors duration-200;
+  }
+
+  .table-row:hover {
+    @apply bg-bg-primary;
+  }
+
+  .button-hover {
+    @apply transition-all duration-200;
+  }
+
+  .button-hover:hover {
+    @apply scale-105 shadow-md;
+  }
+
+  .editable-cell {
+    @apply cursor-pointer p-2 rounded transition-all duration-200;
+  }
+
+  .editable-cell:hover {
+    @apply bg-bg-subtle;
+  }
+
+  .editable-cell.editing {
+    @apply bg-white border-2 border-ey-yellow;
+  }
+
+  .status-pill {
+    @apply inline-block px-3 py-1 rounded-full text-xs font-medium text-white transition-colors duration-300;
+  }
+
+  .progress-bar {
+    @apply h-1.5 rounded-full bg-bg-subtle overflow-hidden;
+  }
+
+  .progress-fill {
+    @apply h-full transition-all duration-300;
+  }
+
+  .calendar-date {
+    @apply w-8 h-8 flex items-center justify-center rounded-full cursor-pointer transition-all duration-150;
+  }
+
+  .calendar-date:hover {
+    @apply bg-bg-subtle;
+  }
+
+  .calendar-date.today {
+    @apply bg-ey-yellow font-bold;
+  }
+
+  .calendar-date.has-event {
+    @apply relative;
+  }
+
+  .calendar-date.has-event::after {
+    @apply content-[''] absolute bottom-0.5 w-1 h-1 rounded-full bg-status-in-progress;
+  }
+
+  .event-card {
+    @apply transition-all duration-200;
+  }
+
+  .event-card:hover {
+    @apply shadow-lg -translate-y-0.5;
+  }
+
+  .toast {
+    @apply fixed bottom-6 right-6 bg-primary-dark text-white px-6 py-3 rounded-lg shadow-lg z-50;
+    animation: slideIn 300ms ease-out;
+  }
+
+  @keyframes slideIn {
+    from {
+      transform: translateX(400px);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  .section-header {
+    @apply font-bold text-sm uppercase tracking-wide px-4 py-3 bg-bg-primary border-l-4 border-ey-yellow mt-4 mb-2;
+  }
+
+  .avatar {
+    @apply w-8 h-8 rounded-full inline-flex items-center justify-center text-xs font-semibold text-white mr-1;
+  }
+
+  .avatar-group {
+    @apply flex items-center;
+  }
+
+  .avatar-group .avatar {
+    @apply -mr-2 border-2 border-white;
+  }
+
+  .sticky-header {
+    @apply sticky top-0 bg-white z-10 shadow-sm;
+  }
+
+  .modal-overlay {
+    @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50;
+  }
+
+  .modal-content {
+    @apply bg-white rounded-2xl p-6 max-w-2xl max-h-[80vh] overflow-y-auto shadow-2xl;
+  }
+
+  .snapshot-card {
+    @apply border border-gray-200 rounded-lg p-4 mb-3 cursor-pointer transition-all duration-200;
+  }
+
+  .snapshot-card:hover {
+    @apply border-ey-yellow shadow-md;
+  }
+}
