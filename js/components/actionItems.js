@@ -52,10 +52,10 @@ export function renderActionItems() {
 
         row.innerHTML = `
             <td>
-                <div style="font-weight: 600; max-width: 300px;" class="text-truncate">${escapeHtml(item.description)}</div>
+                <div style="font-weight: 600;" class="text-wrap">${escapeHtml(item.description)}</div>
             </td>
-            <td>${escapeHtml(item.owner)}</td>
-            <td>${escapeHtml(item.taskforce)}</td>
+            <td class="text-wrap">${escapeHtml(item.owner)}</td>
+            <td class="text-wrap">${escapeHtml(item.taskforce)}</td>
             <td style="white-space: nowrap;">${formatDate(item.date)}</td>
             <td>
                 <span class="status-pill status-${item.status.toLowerCase().replace(' ', '-')}"
@@ -64,7 +64,7 @@ export function renderActionItems() {
                 </span>
             </td>
             <td>
-                <div style="display: flex; gap: 0.5rem;">
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
                     <button class="btn btn-secondary btn-sm" onclick="window.actionItems.viewItemDetails('${item.id}')" title="View Details">
                         <i class="fas fa-eye"></i>
                     </button>
