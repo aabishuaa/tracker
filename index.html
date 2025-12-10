@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EY AI Taskforce Tracker</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- React and ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+    <!-- Babel Standalone for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Google Fonts - Garamond alternative (EB Garamond) -->
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        * {
+            font-family: 'EB Garamond', serif;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #F7FAFC;
+        }
+
+        .ey-yellow {
+            background-color: #FFE600;
+        }
+
+        .ey-yellow-text {
+            color: #FFE600;
+        }
+
+        .status-pill {
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 13px;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .status-done {
+            background-color: #48BB78;
+            color: white;
+        }
+
+        .status-in-progress {
+            background-color: #ED8936;
+            color: white;
+        }
+
+        .status-blocked {
+            background-color: #F56565;
+            color: white;
+        }
+
+        .status-not-started {
+            background-color: #A0AEC0;
+            color: white;
+        }
+
+        .table-row:hover {
+            background-color: #F7FAFC;
+            transition: background-color 200ms ease-in-out;
+        }
+
+        .button-hover:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: all 200ms ease-in-out;
+        }
+
+        .event-card {
+            transition: all 200ms ease-in-out;
+        }
+
+        .event-card:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .editable-cell {
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 4px;
+            transition: all 200ms ease-in-out;
+        }
+
+        .editable-cell:hover {
+            background-color: #EDF2F7;
+        }
+
+        .editable-cell.editing {
+            background-color: white;
+            border: 2px solid #FFE600;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: 2px solid #FFE600;
+            outline-offset: 2px;
+        }
+
+        .progress-bar {
+            height: 6px;
+            border-radius: 3px;
+            background-color: #EDF2F7;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            transition: width 300ms ease-in-out, background-color 300ms ease-in-out;
+        }
+
+        .calendar-date {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 150ms ease-in-out;
+        }
+
+        .calendar-date:hover {
+            background-color: #EDF2F7;
+        }
+
+        .calendar-date.today {
+            background-color: #FFE600;
+            font-weight: 700;
+        }
+
+        .calendar-date.has-event {
+            position: relative;
+        }
+
+        .calendar-date.has-event::after {
+            content: '';
+            position: absolute;
+            bottom: 2px;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background-color: #ED8936;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background-color: #2D3748;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            animation: slideIn 300ms ease-out;
+            z-index: 1000;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .section-header {
+            font-weight: 700;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 12px 16px;
+            background-color: #F7FAFC;
+            border-left: 4px solid #FFE600;
+            margin-top: 16px;
+            margin-bottom: 8px;
+        }
+
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: white;
+            margin-right: 4px;
+        }
+
+        .avatar-group {
+            display: flex;
+            align-items: center;
+        }
+
+        .avatar-group .avatar {
+            margin-right: -8px;
+            border: 2px solid white;
+        }
+
+        .sticky-header {
+            position: sticky;
+            top: 0;
+            background-color: white;
+            z-index: 10;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .snapshot-card {
+            border: 1px solid #E2E8F0;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 200ms ease-in-out;
+        }
+
+        .snapshot-card:hover {
+            border-color: #FFE600;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // Utility Functions
+        const getInitials = (name) => {
+            if (!name) return '?';
+            return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+        };
+
+        const getAvatarColor = (name) => {
+            const colors = ['#4299E1', '#48BB78', '#ED8936', '#9F7AEA', '#F56565', '#38B2AC'];
+            const index = name ? name.charCodeAt(0) % colors.length : 0;
+            return colors[index];
+        };
+
+        const formatDate = (dateString) => {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { month: 'short', day: '2-digit' });
+        };
+
+        const getRelativeTime = (timestamp) => {
+            const now = new Date();
+            const then = new Date(timestamp);
+            const diffMs = now - then;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
+
+            if (diffMins < 1) return 'Just now';
+            if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
+            if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+            if (diffDays === 1) return 'Yesterday';
+            if (diffDays < 7) return `${diffDays} days ago`;
+            return formatDate(timestamp);
+        };
+
+        const exportToCSV = (actionItems) => {
+            const headers = ['Task Name', 'Owner', 'Taskforce', 'Date', 'Status', 'Priority', 'Section', 'Progress', 'Notes'];
+            const rows = actionItems.map(item => [
+                item.description,
+                item.owner,
+                Array.isArray(item.taskforce) ? item.taskforce.join('; ') : item.taskforce,
+                item.date,
+                item.status,
+                item.priority,
+                item.section,
+                item.progress + '%',
+                item.notes || ''
+            ]);
+
+            const csvContent = [
+                headers.join(','),
+                ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+            ].join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const today = new Date().toISOString().split('T')[0];
+            a.download = `EY-AI-Taskforce-${today}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        };
+
+        // Avatar Component
+        const Avatar = ({ name }) => (
+            <div className="avatar" style={{ backgroundColor: getAvatarColor(name) }}>
+                {getInitials(name)}
+            </div>
+        );
+
+        // Status Pill Component
+        const StatusPill = ({ status, onChange }) => {
+            const [isEditing, setIsEditing] = useState(false);
+
+            const statusConfig = {
+                'Done': 'status-done',
+                'In Progress': 'status-in-progress',
+                'Blocked': 'status-blocked',
+                'Not Started': 'status-not-started'
+            };
+
+            const handleChange = (e) => {
+                onChange(e.target.value);
+                setIsEditing(false);
+            };
+
+            if (isEditing) {
+                return (
+                    <select
+                        value={status}
+                        onChange={handleChange}
+                        onBlur={() => setIsEditing(false)}
+                        autoFocus
+                        className="status-pill border-0 cursor-pointer"
+                    >
+                        <option value="Not Started">Not Started</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Blocked">Blocked</option>
+                        <option value="Done">Done</option>
+                    </select>
+                );
+            }
+
+            return (
+                <span
+                    className={`status-pill ${statusConfig[status] || 'status-not-started'} cursor-pointer`}
+                    onClick={() => setIsEditing(true)}
+                >
+                    {status}
+                </span>
+            );
+        };
+
+        // Progress Bar Component
+        const ProgressBar = ({ progress, status }) => {
+            const getColor = () => {
+                if (status === 'Done') return '#48BB78';
+                if (status === 'In Progress') return '#ED8936';
+                if (status === 'Blocked') return '#F56565';
+                return '#A0AEC0';
+            };
+
+            return (
+                <div className="progress-bar">
+                    <div
+                        className="progress-fill"
+                        style={{ width: `${progress}%`, backgroundColor: getColor() }}
+                    />
+                </div>
+            );
+        };
+
+        // Editable Cell Component
+        const EditableCell = ({ value, onChange, type = 'text', className = '' }) => {
+            const [isEditing, setIsEditing] = useState(false);
+            const [tempValue, setTempValue] = useState(value);
+
+            const handleBlur = () => {
+                setIsEditing(false);
+                onChange(tempValue);
+            };
+
+            if (isEditing) {
+                return (
+                    <input
+                        type={type}
+                        value={tempValue}
+                        onChange={(e) => setTempValue(e.target.value)}
+                        onBlur={handleBlur}
+                        onKeyDown={(e) => e.key === 'Enter' && handleBlur()}
+                        autoFocus
+                        className={`editable-cell editing ${className} w-full border-0`}
+                    />
+                );
+            }
+
+            return (
+                <div
+                    className={`editable-cell ${className}`}
+                    onClick={() => setIsEditing(true)}
+                >
+                    {value || <span className="text-gray-400">Click to edit</span>}
+                </div>
+            );
+        };
+
+        // Table Row Component
+        const TableRow = ({ item, onUpdate, priorityColor }) => {
+            const handleUpdate = (field, value) => {
+                onUpdate(item.id, { ...item, [field]: value, lastUpdated: new Date().toISOString() });
+            };
+
+            return (
+                <tr className="table-row border-b border-gray-200" style={{ borderLeft: `4px solid ${priorityColor}` }}>
+                    <td className="px-4 py-3">
+                        <EditableCell
+                            value={item.description}
+                            onChange={(val) => handleUpdate('description', val)}
+                            className="font-medium text-gray-800"
+                        />
+                    </td>
+                    <td className="px-4 py-3">
+                        <div className="flex items-center">
+                            <Avatar name={item.owner} />
+                            <EditableCell
+                                value={item.owner}
+                                onChange={(val) => handleUpdate('owner', val)}
+                                className="ml-2"
+                            />
+                        </div>
+                    </td>
+                    <td className="px-4 py-3">
+                        <div className="avatar-group">
+                            {Array.isArray(item.taskforce) ? (
+                                item.taskforce.map((person, idx) => (
+                                    <Avatar key={idx} name={person} />
+                                ))
+                            ) : (
+                                <Avatar name={item.taskforce} />
+                            )}
+                        </div>
+                    </td>
+                    <td className="px-4 py-3">
+                        <EditableCell
+                            value={item.date}
+                            onChange={(val) => handleUpdate('date', val)}
+                            type="date"
+                        />
+                    </td>
+                    <td className="px-4 py-3">
+                        <StatusPill
+                            status={item.status}
+                            onChange={(val) => handleUpdate('status', val)}
+                        />
+                    </td>
+                    <td className="px-4 py-3">
+                        <ProgressBar progress={item.progress} status={item.status} />
+                        <div className="text-xs text-gray-500 mt-1">{item.progress}%</div>
+                    </td>
+                    <td className="px-4 py-3">
+                        <EditableCell
+                            value={item.notes}
+                            onChange={(val) => handleUpdate('notes', val)}
+                            className="text-sm text-gray-600"
+                        />
+                    </td>
+                </tr>
+            );
+        };
+
+        // Action Items Table Component
+        const ActionItemsTable = ({ items, onUpdate, onAdd }) => {
+            const sections = [...new Set(items.map(item => item.section))];
+
+            const getPriorityColor = (priority) => {
+                switch(priority) {
+                    case 'High': return '#F56565';
+                    case 'Medium': return '#ED8936';
+                    case 'Low': return '#48BB78';
+                    default: return '#A0AEC0';
+                }
+            };
+
+            return (
+                <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+                    <div className="overflow-x-auto">
+                        <table className="w-full">
+                            <thead className="sticky-header">
+                                <tr className="bg-gray-50 border-b-2 border-gray-200">
+                                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Task Name</th>
+                                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Owner</th>
+                                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Taskforce</th>
+                                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Date</th>
+                                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
+                                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Timeline</th>
+                                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Notes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {sections.map(section => (
+                                    <React.Fragment key={section}>
+                                        <tr>
+                                            <td colSpan="7">
+                                                <div className="section-header">{section}</div>
+                                            </td>
+                                        </tr>
+                                        {items
+                                            .filter(item => item.section === section)
+                                            .map(item => (
+                                                <TableRow
+                                                    key={item.id}
+                                                    item={item}
+                                                    onUpdate={onUpdate}
+                                                    priorityColor={getPriorityColor(item.priority)}
+                                                />
+                                            ))}
+                                    </React.Fragment>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div className="p-4 border-t border-gray-200">
+                        <button
+                            onClick={onAdd}
+                            className="button-hover flex items-center gap-2 px-4 py-2 bg-white border-2 border-gray-300 rounded-lg text-gray-700 font-medium hover:border-yellow-400 hover:bg-yellow-50"
+                        >
+                            <span className="text-xl">+</span>
+                            Add Item
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        // Mini Calendar Component
+        const MiniCalendar = ({ events }) => {
+            const [currentDate, setCurrentDate] = useState(new Date());
+
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            const today = new Date();
+            const isToday = (day) => {
+                return today.getDate() === day &&
+                       today.getMonth() === month &&
+                       today.getFullYear() === year;
+            };
+
+            const hasEvent = (day) => {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                return events.some(event => event.date === dateStr);
+            };
+
+            const days = [];
+            for (let i = 0; i < firstDay; i++) {
+                days.push(<div key={`empty-${i}`} className="calendar-date"></div>);
+            }
+            for (let day = 1; day <= daysInMonth; day++) {
+                days.push(
+                    <div
+                        key={day}
+                        className={`calendar-date ${isToday(day) ? 'today' : ''} ${hasEvent(day) ? 'has-event' : ''}`}
+                    >
+                        {day}
+                    </div>
+                );
+            }
+
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                              'July', 'August', 'September', 'October', 'November', 'December'];
+
+            return (
+                <div className="bg-white rounded-lg p-4 shadow-sm">
+                    <div className="flex items-center justify-between mb-4">
+                        <button
+                            onClick={() => setCurrentDate(new Date(year, month - 1))}
+                            className="text-gray-600 hover:text-gray-900 p-1"
+                        >
+                            ←
+                        </button>
+                        <h3 className="font-bold text-lg">{monthNames[month]} {year}</h3>
+                        <button
+                            onClick={() => setCurrentDate(new Date(year, month + 1))}
+                            className="text-gray-600 hover:text-gray-900 p-1"
+                        >
+                            →
+                        </button>
+                    </div>
+                    <div className="grid grid-cols-7 gap-1 text-center text-xs text-gray-500 mb-2">
+                        <div>Su</div>
+                        <div>Mo</div>
+                        <div>Tu</div>
+                        <div>We</div>
+                        <div>Th</div>
+                        <div>Fr</div>
+                        <div>Sa</div>
+                    </div>
+                    <div className="grid grid-cols-7 gap-1 text-sm">
+                        {days}
+                    </div>
+                </div>
+            );
+        };
+
+        // Event Card Component
+        const EventCard = ({ event }) => {
+            const categoryColors = {
+                'Meeting': '#4299E1',
+                'Deadline': '#F56565',
+                'Review': '#9F7AEA',
+                'Workshop': '#48BB78'
+            };
+
+            return (
+                <div className="event-card bg-gradient-to-r from-white to-gray-50 rounded-lg p-4 mb-3 border-l-4"
+                     style={{ borderLeftColor: categoryColors[event.category] || '#A0AEC0' }}>
+                    <h4 className="font-bold text-gray-800 mb-1">{event.title}</h4>
+                    <div className="text-sm text-gray-600 flex items-center gap-1 mb-2">
+                        📅 {formatDate(event.date)}
+                    </div>
+                    <p className="text-sm text-gray-600 mb-2 line-clamp-2">{event.description}</p>
+                    <span className="inline-block px-2 py-1 bg-gray-200 text-gray-700 text-xs rounded-full">
+                        {event.category}
+                    </span>
+                </div>
+            );
+        };
+
+        // Calendar Sidebar Component
+        const CalendarSidebar = ({ events, onAddEvent }) => {
+            return (
+                <div className="space-y-4">
+                    <div>
+                        <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                            📅 Upcoming Events
+                        </h2>
+                        <MiniCalendar events={events} />
+                    </div>
+
+                    <div className="space-y-3 max-h-96 overflow-y-auto">
+                        {events
+                            .sort((a, b) => new Date(a.date) - new Date(b.date))
+                            .slice(0, 5)
+                            .map(event => (
+                                <EventCard key={event.id} event={event} />
+                            ))}
+                    </div>
+
+                    <button
+                        onClick={onAddEvent}
+                        className="button-hover w-full py-3 ey-yellow text-gray-900 font-bold rounded-lg flex items-center justify-center gap-2"
+                    >
+                        <span className="text-xl">+</span>
+                        Add Event
+                    </button>
+                </div>
+            );
+        };
+
+        // Add Event Modal Component
+        const AddEventModal = ({ onClose, onAdd }) => {
+            const [title, setTitle] = useState('');
+            const [date, setDate] = useState('');
+            const [description, setDescription] = useState('');
+            const [category, setCategory] = useState('Meeting');
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                onAdd({
+                    id: Date.now(),
+                    title,
+                    date,
+                    description,
+                    category
+                });
+                onClose();
+            };
+
+            return (
+                <div className="modal-overlay" onClick={onClose}>
+                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                        <h2 className="text-2xl font-bold mb-4">Add New Event</h2>
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                                <input
+                                    type="text"
+                                    value={title}
+                                    onChange={(e) => setTitle(e.target.value)}
+                                    required
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                                <input
+                                    type="date"
+                                    value={date}
+                                    onChange={(e) => setDate(e.target.value)}
+                                    required
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                                <select
+                                    value={category}
+                                    onChange={(e) => setCategory(e.target.value)}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                >
+                                    <option value="Meeting">Meeting</option>
+                                    <option value="Deadline">Deadline</option>
+                                    <option value="Review">Review</option>
+                                    <option value="Workshop">Workshop</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                                <textarea
+                                    value={description}
+                                    onChange={(e) => setDescription(e.target.value)}
+                                    rows="3"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                />
+                            </div>
+                            <div className="flex gap-2">
+                                <button
+                                    type="submit"
+                                    className="button-hover flex-1 py-2 ey-yellow text-gray-900 font-bold rounded-lg"
+                                >
+                                    Add Event
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={onClose}
+                                    className="button-hover flex-1 py-2 bg-gray-200 text-gray-700 font-medium rounded-lg"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            );
+        };
+
+        // Snapshot History Panel Component
+        const SnapshotHistoryPanel = ({ snapshots, onView, onClose }) => {
+            return (
+                <div className="bg-white border-b-2 border-gray-200 shadow-lg p-6">
+                    <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-2xl font-bold text-gray-800">Saved Snapshots</h2>
+                        <button
+                            onClick={onClose}
+                            className="text-gray-600 hover:text-gray-900 text-2xl"
+                        >
+                            ×
+                        </button>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-h-96 overflow-y-auto">
+                        {snapshots.length === 0 ? (
+                            <div className="col-span-3 text-center py-8 text-gray-500">
+                                No snapshots saved yet
+                            </div>
+                        ) : (
+                            snapshots.map(snapshot => (
+                                <div
+                                    key={snapshot.id}
+                                    className="snapshot-card"
+                                    onClick={() => onView(snapshot)}
+                                >
+                                    <h3 className="font-bold text-gray-800 mb-2">{snapshot.name}</h3>
+                                    <p className="text-sm text-gray-600 mb-2">
+                                        {getRelativeTime(snapshot.timestamp)}
+                                    </p>
+                                    <p className="text-sm text-gray-500">
+                                        {snapshot.actionItems.length} items • {snapshot.calendarEvents.length} events
+                                    </p>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        // Toast Notification Component
+        const Toast = ({ message, onClose }) => {
+            useEffect(() => {
+                const timer = setTimeout(onClose, 3000);
+                return () => clearTimeout(timer);
+            }, [onClose]);
+
+            return (
+                <div className="toast">
+                    ✓ {message}
+                </div>
+            );
+        };
+
+        // Main App Component
+        const App = () => {
+            const [actionItems, setActionItems] = useState([]);
+            const [calendarEvents, setCalendarEvents] = useState([]);
+            const [snapshots, setSnapshots] = useState([]);
+            const [showHistory, setShowHistory] = useState(false);
+            const [showAddEvent, setShowAddEvent] = useState(false);
+            const [toast, setToast] = useState(null);
+
+            // Load from localStorage
+            useEffect(() => {
+                const savedItems = localStorage.getItem('ey-action-items');
+                const savedEvents = localStorage.getItem('ey-calendar-events');
+                const savedSnapshots = localStorage.getItem('ey-snapshots');
+
+                if (savedItems) setActionItems(JSON.parse(savedItems));
+                if (savedEvents) setCalendarEvents(JSON.parse(savedEvents));
+                if (savedSnapshots) setSnapshots(JSON.parse(savedSnapshots));
+
+                // Initialize with sample data if empty
+                if (!savedItems) {
+                    const sampleItems = [
+                        {
+                            id: 1,
+                            description: 'Define AI strategy roadmap',
+                            owner: 'Sarah Chen',
+                            taskforce: ['Sarah Chen', 'John Doe'],
+                            date: '2025-12-15',
+                            status: 'In Progress',
+                            priority: 'High',
+                            section: 'Planning',
+                            progress: 65,
+                            notes: 'Waiting on stakeholder feedback',
+                            lastUpdated: new Date().toISOString()
+                        },
+                        {
+                            id: 2,
+                            description: 'Research AI tools and platforms',
+                            owner: 'Michael Brooks',
+                            taskforce: ['Michael Brooks'],
+                            date: '2025-12-20',
+                            status: 'Done',
+                            priority: 'Medium',
+                            section: 'Planning',
+                            progress: 100,
+                            notes: 'Completed analysis report',
+                            lastUpdated: new Date().toISOString()
+                        },
+                        {
+                            id: 3,
+                            description: 'Develop proof of concept',
+                            owner: 'Emily Watson',
+                            taskforce: ['Emily Watson', 'David Lee'],
+                            date: '2025-12-25',
+                            status: 'Not Started',
+                            priority: 'High',
+                            section: 'Execution',
+                            progress: 0,
+                            notes: '',
+                            lastUpdated: new Date().toISOString()
+                        }
+                    ];
+                    setActionItems(sampleItems);
+                }
+
+                if (!savedEvents) {
+                    const sampleEvents = [
+                        {
+                            id: 1,
+                            title: 'AI Strategy Review',
+                            date: '2025-12-15',
+                            description: 'Quarterly review of AI initiatives and progress',
+                            category: 'Meeting'
+                        },
+                        {
+                            id: 2,
+                            title: 'POC Presentation Deadline',
+                            date: '2025-12-25',
+                            description: 'Final deadline for proof of concept presentation',
+                            category: 'Deadline'
+                        }
+                    ];
+                    setCalendarEvents(sampleEvents);
+                }
+            }, []);
+
+            // Save to localStorage
+            useEffect(() => {
+                if (actionItems.length > 0) {
+                    localStorage.setItem('ey-action-items', JSON.stringify(actionItems));
+                }
+            }, [actionItems]);
+
+            useEffect(() => {
+                if (calendarEvents.length > 0) {
+                    localStorage.setItem('ey-calendar-events', JSON.stringify(calendarEvents));
+                }
+            }, [calendarEvents]);
+
+            useEffect(() => {
+                if (snapshots.length > 0) {
+                    localStorage.setItem('ey-snapshots', JSON.stringify(snapshots));
+                }
+            }, [snapshots]);
+
+            const handleUpdateItem = (id, updatedItem) => {
+                setActionItems(items =>
+                    items.map(item => item.id === id ? updatedItem : item)
+                );
+            };
+
+            const handleAddItem = () => {
+                const newItem = {
+                    id: Date.now(),
+                    description: 'New task',
+                    owner: 'Unassigned',
+                    taskforce: ['Unassigned'],
+                    date: new Date().toISOString().split('T')[0],
+                    status: 'Not Started',
+                    priority: 'Medium',
+                    section: 'Planning',
+                    progress: 0,
+                    notes: '',
+                    lastUpdated: new Date().toISOString()
+                };
+                setActionItems([...actionItems, newItem]);
+            };
+
+            const handleAddEvent = (event) => {
+                setCalendarEvents([...calendarEvents, event]);
+                setToast('Event added successfully!');
+            };
+
+            const handleSaveSnapshot = () => {
+                const snapshot = {
+                    id: Date.now(),
+                    timestamp: new Date().toISOString(),
+                    name: `Snapshot - ${new Date().toLocaleString()}`,
+                    actionItems: [...actionItems],
+                    calendarEvents: [...calendarEvents]
+                };
+                setSnapshots([snapshot, ...snapshots]);
+                setToast('Snapshot saved successfully!');
+            };
+
+            const handleExportCSV = () => {
+                exportToCSV(actionItems);
+                setToast('Exported to CSV!');
+            };
+
+            const handleViewSnapshot = (snapshot) => {
+                if (window.confirm('View this snapshot? (Current data will not be affected)')) {
+                    alert(`Snapshot: ${snapshot.name}\n\nItems: ${snapshot.actionItems.length}\nEvents: ${snapshot.calendarEvents.length}`);
+                }
+            };
+
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    {/* Header */}
+                    <header className="bg-white border-b-2 border-gray-200 shadow-sm">
+                        <div className="max-w-[1600px] mx-auto px-6 py-6">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-1 h-16 ey-yellow rounded-full"></div>
+                                    <div>
+                                        <h1 className="text-4xl font-bold text-gray-900">EY AI Taskforce</h1>
+                                        <p className="text-gray-600 text-lg mt-1">Action Items & Initiative Tracker</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <button
+                                        onClick={handleSaveSnapshot}
+                                        className="button-hover px-4 py-2 bg-gray-800 text-white rounded-lg font-medium flex items-center gap-2"
+                                    >
+                                        💾 Save Snapshot
+                                    </button>
+                                    <button
+                                        onClick={handleExportCSV}
+                                        className="button-hover px-4 py-2 ey-yellow text-gray-900 rounded-lg font-bold flex items-center gap-2"
+                                    >
+                                        📊 Export CSV
+                                    </button>
+                                    <button
+                                        onClick={() => setShowHistory(!showHistory)}
+                                        className="button-hover px-4 py-2 bg-gray-200 text-gray-800 rounded-lg font-medium flex items-center gap-2"
+                                    >
+                                        📜 View History
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+
+                    {/* Snapshot History Panel */}
+                    {showHistory && (
+                        <SnapshotHistoryPanel
+                            snapshots={snapshots}
+                            onView={handleViewSnapshot}
+                            onClose={() => setShowHistory(false)}
+                        />
+                    )}
+
+                    {/* Main Content */}
+                    <main className="max-w-[1600px] mx-auto px-6 py-8">
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            {/* Left Column - Action Items Table */}
+                            <div className="lg:col-span-2">
+                                <ActionItemsTable
+                                    items={actionItems}
+                                    onUpdate={handleUpdateItem}
+                                    onAdd={handleAddItem}
+                                />
+                            </div>
+
+                            {/* Right Column - Calendar Sidebar */}
+                            <div>
+                                <CalendarSidebar
+                                    events={calendarEvents}
+                                    onAddEvent={() => setShowAddEvent(true)}
+                                />
+                            </div>
+                        </div>
+                    </main>
+
+                    {/* Add Event Modal */}
+                    {showAddEvent && (
+                        <AddEventModal
+                            onClose={() => setShowAddEvent(false)}
+                            onAdd={handleAddEvent}
+                        />
+                    )}
+
+                    {/* Toast Notification */}
+                    {toast && (
+                        <Toast
+                            message={toast}
+                            onClose={() => setToast(null)}
+                        />
+                    )}
+                </div>
+            );
+        };
+
+        // Render the app
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
