@@ -108,6 +108,13 @@ function attachEventListeners() {
     document.getElementById('cancelDeleteBtn').addEventListener('click', () => closeModal('deleteModal'));
     document.getElementById('closeDeleteModal').addEventListener('click', () => closeModal('deleteModal'));
 
+    // Item details modal
+    document.getElementById('closeItemDetailsModal').addEventListener('click', () => {
+        closeModal('itemDetailsModal');
+        state.selectedItemId = null;
+        renderActionItems();
+    });
+
     // Table sorting
     document.querySelectorAll('.action-table th[data-sort]').forEach(th => {
         th.addEventListener('click', () => {

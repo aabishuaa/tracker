@@ -295,6 +295,33 @@
         </div>
     </div>
 
+    <!-- Item Details Modal -->
+    <div class="modal-overlay" id="itemDetailsModal">
+        <div class="modal-content modal-content-large">
+            <div class="modal-header">
+                <h2 class="modal-title">Item Details</h2>
+                <button class="modal-close" id="closeItemDetailsModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="itemDetailsContent">
+                    <!-- Item details will be rendered here -->
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" id="editItemDetailsBtn">
+                    <i class="fas fa-edit"></i>
+                    Edit
+                </button>
+                <button class="btn btn-danger" id="deleteItemDetailsBtn">
+                    <i class="fas fa-trash-alt"></i>
+                    Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Status Update Menu -->
     <div class="status-menu" id="statusMenu">
         <div class="status-menu-item not-started" onclick="window.actionItems.updateItemStatus('Not Started')">
