@@ -8,11 +8,25 @@
     <!-- Favicon: EY Yellow block -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23FFE600'/></svg>">
 
+    <!-- Google Fonts - Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+    <!-- Quill.js for rich text editing -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+
     <!-- SheetJS for Excel export -->
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+
+    <!-- Quill.js for rich text editing -->
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
+    <!-- Chart.js for charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
     <!-- External CSS -->
     <link rel="stylesheet" href="styles.css">
@@ -70,14 +84,20 @@
                     <div class="section-header">
                         <h2 class="section-title">Action Items</h2>
                         <div class="table-controls">
-                            <input type="text" class="search-box" id="searchBox" placeholder="Search action items...">
-                            <select class="filter-select" id="statusFilter">
-                                <option value="">All Statuses</option>
-                                <option value="Not Started">Not Started</option>
-                                <option value="In Progress">In Progress</option>
-                                <option value="Blocked">Blocked</option>
-                                <option value="Done">Done</option>
-                            </select>
+                            <div class="search-wrapper">
+                                <i class="fas fa-search search-icon"></i>
+                                <input type="text" class="search-box" id="searchBox" placeholder="Search action items...">
+                            </div>
+                            <div class="filter-wrapper">
+                                <i class="fas fa-filter filter-icon"></i>
+                                <select class="filter-select" id="statusFilter">
+                                    <option value="">All Statuses</option>
+                                    <option value="Not Started">Not Started</option>
+                                    <option value="In Progress">In Progress</option>
+                                    <option value="Blocked">Blocked</option>
+                                    <option value="Done">Done</option>
+                                </select>
+                            </div>
                             <button class="btn btn-primary" id="addItemBtn">
                                 <i class="fas fa-plus"></i>
                                 Add Action Item
@@ -199,7 +219,8 @@
                     </div>
                     <div class="form-group">
                         <label class="form-label" for="itemNotes">Notes</label>
-                        <textarea class="form-textarea" id="itemNotes"></textarea>
+                        <div id="itemNotesEditor" style="background: white; min-height: 150px;"></div>
+                        <input type="hidden" id="itemNotes">
                     </div>
                 </form>
             </div>
@@ -241,7 +262,8 @@
                     </div>
                     <div class="form-group">
                         <label class="form-label" for="eventDescription">Description</label>
-                        <textarea class="form-textarea" id="eventDescription"></textarea>
+                        <div id="eventDescriptionEditor" style="background: white; min-height: 120px;"></div>
+                        <input type="hidden" id="eventDescription">
                     </div>
                 </form>
             </div>
@@ -270,6 +292,26 @@
                 <button class="btn btn-secondary" id="cancelDeleteBtn">Cancel</button>
                 <button class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Status Update Menu -->
+    <div class="status-menu" id="statusMenu">
+        <div class="status-menu-item not-started" onclick="updateItemStatus('Not Started')">
+            <i class="fas fa-circle"></i>
+            Not Started
+        </div>
+        <div class="status-menu-item in-progress" onclick="updateItemStatus('In Progress')">
+            <i class="fas fa-spinner"></i>
+            In Progress
+        </div>
+        <div class="status-menu-item blocked" onclick="updateItemStatus('Blocked')">
+            <i class="fas fa-ban"></i>
+            Blocked
+        </div>
+        <div class="status-menu-item done" onclick="updateItemStatus('Done')">
+            <i class="fas fa-check-circle"></i>
+            Done
         </div>
     </div>
 

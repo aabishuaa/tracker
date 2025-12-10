@@ -10,11 +10,13 @@
 }
 
 body {
-    font-family: "Aptos", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     background-color: #F7FAFC;
     color: #1A1A1A;
     line-height: 1.6;
     min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 /* Header Styles */
@@ -261,35 +263,84 @@ body {
     flex-wrap: wrap;
 }
 
+/* Search Wrapper with Icon */
+.search-wrapper {
+    position: relative;
+    width: 280px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #A0AEC0;
+    font-size: 0.9rem;
+    pointer-events: none;
+}
+
 .search-box {
-    padding: 0.625rem 1rem;
+    padding: 0.75rem 1rem 0.75rem 2.75rem;
     border: 2px solid #E2E8F0;
-    border-radius: 6px;
+    border-radius: 8px;
     font-family: inherit;
     font-size: 0.9rem;
-    width: 250px;
-    transition: border-color 0.2s ease;
+    width: 100%;
+    transition: all 0.2s ease;
+    background-color: #FFFFFF;
 }
 
 .search-box:focus {
     outline: none;
     border-color: #FFE600;
+    box-shadow: 0 0 0 3px rgba(255, 230, 0, 0.1);
+}
+
+.search-box:focus + .search-icon {
+    color: #FFE600;
+}
+
+/* Filter Wrapper with Icon */
+.filter-wrapper {
+    position: relative;
+    min-width: 180px;
+}
+
+.filter-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #A0AEC0;
+    font-size: 0.85rem;
+    pointer-events: none;
 }
 
 .filter-select {
-    padding: 0.625rem 1rem;
+    padding: 0.75rem 1rem 0.75rem 2.5rem;
     border: 2px solid #E2E8F0;
-    border-radius: 6px;
+    border-radius: 8px;
     font-family: inherit;
     font-size: 0.9rem;
     background-color: #FFFFFF;
     cursor: pointer;
-    transition: border-color 0.2s ease;
+    transition: all 0.2s ease;
+    width: 100%;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23718096' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    padding-right: 2.5rem;
 }
 
 .filter-select:focus {
     outline: none;
     border-color: #FFE600;
+    box-shadow: 0 0 0 3px rgba(255, 230, 0, 0.1);
+}
+
+.filter-select:hover {
+    border-color: #CBD5E0;
 }
 
 /* Table Styles */
@@ -843,11 +894,101 @@ body {
     margin-top: 0.25rem;
 }
 
+.snapshot-charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+@media (max-width: 1200px) {
+    .snapshot-charts-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
 .snapshot-chart {
-    background-color: #F7FAFC;
+    background-color: #FFFFFF;
+    border: 2px solid #E2E8F0;
     border-radius: 8px;
     padding: 2rem;
+}
+
+.snapshot-chart canvas {
+    max-height: 300px;
+}
+
+.snapshot-tasks-table {
     margin-top: 2rem;
+    background-color: #FFFFFF;
+    border: 2px solid #E2E8F0;
+    border-radius: 8px;
+    padding: 2rem;
+}
+
+.snapshot-tasks-table h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #000000;
+    margin-bottom: 1.5rem;
+}
+
+.snapshot-tasks-list {
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.snapshot-task-card {
+    padding: 1.25rem;
+    border: 2px solid #E2E8F0;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    transition: all 0.2s ease;
+}
+
+.snapshot-task-card:hover {
+    border-color: #CBD5E0;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+}
+
+.snapshot-task-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.75rem;
+}
+
+.snapshot-task-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #000000;
+    flex: 1;
+}
+
+.snapshot-task-meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+}
+
+.snapshot-task-meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.snapshot-task-meta-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #718096;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.snapshot-task-meta-value {
+    font-size: 0.9rem;
+    color: #2D3748;
 }
 
 .chart-title {
@@ -1010,6 +1151,91 @@ body {
 .form-textarea {
     min-height: 100px;
     resize: vertical;
+}
+
+/* Quill Editor Customization */
+.ql-container {
+    font-family: inherit;
+    font-size: 0.95rem;
+}
+
+.ql-editor {
+    min-height: 120px;
+}
+
+.ql-snow .ql-picker {
+    font-family: inherit;
+}
+
+/* Status Update Menu */
+.status-menu {
+    position: fixed;
+    background: white;
+    border: 2px solid #E2E8F0;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    padding: 0.5rem;
+    z-index: 1000;
+    min-width: 180px;
+    display: none;
+}
+
+.status-menu.active {
+    display: block;
+}
+
+.status-menu-item {
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.status-menu-item:hover {
+    background-color: #F7FAFC;
+    transform: translateX(4px);
+}
+
+.status-menu-item i {
+    width: 16px;
+    text-align: center;
+}
+
+.status-menu-item.not-started {
+    color: #4A5568;
+}
+
+.status-menu-item.not-started:hover {
+    background-color: #EDF2F7;
+}
+
+.status-menu-item.in-progress {
+    color: #C05621;
+}
+
+.status-menu-item.in-progress:hover {
+    background-color: #FEF5E7;
+}
+
+.status-menu-item.blocked {
+    color: #C53030;
+}
+
+.status-menu-item.blocked:hover {
+    background-color: #FFF5F5;
+}
+
+.status-menu-item.done {
+    color: #22543D;
+}
+
+.status-menu-item.done:hover {
+    background-color: #F0FFF4;
 }
 
 .modal-actions {
