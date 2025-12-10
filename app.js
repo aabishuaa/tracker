@@ -9,8 +9,18 @@ let snapshots = [];
 let currentSort = { field: null, direction: 'asc' };
 let currentMonth = new Date();
 let editingItemId = null;
+let editingEventId = null;
 let deleteCallback = null;
 let selectedItemId = null;
+let statusMenuItemId = null;
+
+// Rich Text Editors
+let itemNotesEditor = null;
+let eventDescriptionEditor = null;
+
+// Charts
+let statusBarChart = null;
+let statusPieChart = null;
 
 // Initial seed data (professional and realistic) - NO CALENDAR EVENTS
 const seedActionItems = [
@@ -59,6 +69,9 @@ function initializeApp() {
     calendarEvents = loadFromStorage('ey-calendar-events', seedEvents);
     snapshots = loadFromStorage('ey-snapshots', []);
 
+    // Initialize rich text editors
+    initializeEditors();
+
     // Render initial views
     renderActionItems();
     renderDetailsPanel();
@@ -67,6 +80,40 @@ function initializeApp() {
 
     // Attach event listeners
     attachEventListeners();
+}
+
+// ============================================
+// RICH TEXT EDITORS
+// ============================================
+
+function initializeEditors() {
+    // Initialize Quill editor for action item notes
+    itemNotesEditor = new Quill('#itemNotesEditor', {
+        theme: 'snow',
+        placeholder: 'Add notes with rich formatting...',
+        modules: {
+            toolbar: [
+                [{ 'header': [1, 2, 3, false] }],
+                ['bold', 'italic', 'underline'],
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                ['link'],
+                ['clean']
+            ]
+        }
+    });
+
+    // Initialize Quill editor for event description
+    eventDescriptionEditor = new Quill('#eventDescriptionEditor', {
+        theme: 'snow',
+        placeholder: 'Add event description...',
+        modules: {
+            toolbar: [
+                ['bold', 'italic', 'underline'],
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                ['clean']
+            ]
+        }
+    });
 }
 
 // ============================================
@@ -283,7 +330,7 @@ function renderDetailsPanel() {
             </div>
             <div class="detail-item">
                 <div class="detail-label">Notes</div>
-                <div class="detail-value">${escapeHtml(item.notes) || '<em style="color: #A0AEC0;">No notes added yet</em>'}</div>
+                <div class="detail-value">${item.notes || '<em style="color: #A0AEC0;">No notes added yet</em>'}</div>
             </div>
             <div class="detail-item">
                 <div class="detail-label">Last Updated</div>
@@ -312,6 +359,7 @@ function openAddItemModal() {
     document.getElementById('itemModalTitle').textContent = 'Add Action Item';
     document.getElementById('itemForm').reset();
     document.getElementById('itemDate').valueAsDate = new Date();
+    itemNotesEditor.setContents([]);
     openModal('itemModal');
 }
 
@@ -326,7 +374,18 @@ function editItem(id) {
     document.getElementById('itemTaskforce').value = item.taskforce;
     document.getElementById('itemDate').value = item.date;
     document.getElementById('itemStatus').value = item.status;
-    document.getElementById('itemNotes').value = item.notes;
+
+    // Set editor content - handle both HTML and plain text
+    if (item.notes) {
+        if (item.notes.startsWith('<')) {
+            itemNotesEditor.root.innerHTML = item.notes;
+        } else {
+            itemNotesEditor.setText(item.notes);
+        }
+    } else {
+        itemNotesEditor.setContents([]);
+    }
+
     openModal('itemModal');
 }
 
@@ -336,7 +395,7 @@ function saveItem() {
     const taskforce = document.getElementById('itemTaskforce').value.trim();
     const date = document.getElementById('itemDate').value;
     const status = document.getElementById('itemStatus').value;
-    const notes = document.getElementById('itemNotes').value.trim();
+    const notes = itemNotesEditor.root.innerHTML.trim();
 
     if (!description || !owner || !date) {
         showToast('Please fill in all required fields', 'error');
@@ -412,6 +471,55 @@ function deleteItem(id) {
     };
 
     openModal('deleteModal');
+}
+
+// ============================================
+// STATUS UPDATE MENU
+// ============================================
+
+function openStatusMenu(itemId, event) {
+    event.stopPropagation();
+    statusMenuItemId = itemId;
+    const menu = document.getElementById('statusMenu');
+    const rect = event.target.getBoundingClientRect();
+
+    // Position menu below the status pill
+    menu.style.left = `${rect.left}px`;
+    menu.style.top = `${rect.bottom + 5}px`;
+    menu.classList.add('active');
+
+    // Close menu when clicking outside
+    setTimeout(() => {
+        document.addEventListener('click', closeStatusMenu);
+    }, 0);
+}
+
+function closeStatusMenu() {
+    const menu = document.getElementById('statusMenu');
+    menu.classList.remove('active');
+    document.removeEventListener('click', closeStatusMenu);
+}
+
+function updateItemStatus(newStatus) {
+    if (!statusMenuItemId) return;
+
+    const index = actionItems.findIndex(i => i.id === statusMenuItemId);
+    if (index !== -1) {
+        actionItems[index].status = newStatus;
+        actionItems[index].lastUpdated = new Date().toISOString();
+        saveToStorage('ey-action-items', actionItems);
+        renderActionItems();
+
+        // Update details panel if this item is selected
+        if (selectedItemId === statusMenuItemId) {
+            renderDetailsPanel();
+        }
+
+        showToast(`Status updated to "${newStatus}"`);
+    }
+
+    closeStatusMenu();
+    statusMenuItemId = null;
 }
 
 // ============================================
@@ -583,10 +691,13 @@ function renderEvents() {
                     <div class="event-date">${formatDateLong(event.date)}</div>
                 </div>
             </div>
-            <div class="event-description">${escapeHtml(event.description)}</div>
+            <div class="event-description">${event.description}</div>
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <span class="event-category">${event.category}</span>
                 <div class="event-actions">
+                    <button class="btn btn-secondary btn-sm" onclick="editEvent('${event.id}')" title="Edit">
+                        <i class="fas fa-edit"></i>
+                    </button>
                     <button class="btn btn-danger btn-sm" onclick="deleteEvent('${event.id}')" title="Delete">
                         <i class="fas fa-trash"></i>
                     </button>
@@ -614,8 +725,37 @@ function getEventIconClass(category) {
 // ============================================
 
 function openAddEventModal() {
+    editingEventId = null;
     document.getElementById('eventForm').reset();
     document.getElementById('eventDate').valueAsDate = new Date();
+    eventDescriptionEditor.setContents([]);
+    document.querySelector('#eventModal .modal-title').textContent = 'Add Calendar Event';
+    document.getElementById('saveEventBtn').textContent = 'Add Event';
+    openModal('eventModal');
+}
+
+function editEvent(id) {
+    const event = calendarEvents.find(e => e.id === id);
+    if (!event) return;
+
+    editingEventId = id;
+    document.getElementById('eventTitle').value = event.title;
+    document.getElementById('eventDate').value = event.date;
+    document.getElementById('eventCategory').value = event.category;
+
+    // Set editor content - handle both HTML and plain text
+    if (event.description) {
+        if (event.description.startsWith('<')) {
+            eventDescriptionEditor.root.innerHTML = event.description;
+        } else {
+            eventDescriptionEditor.setText(event.description);
+        }
+    } else {
+        eventDescriptionEditor.setContents([]);
+    }
+
+    document.querySelector('#eventModal .modal-title').textContent = 'Edit Calendar Event';
+    document.getElementById('saveEventBtn').textContent = 'Save Changes';
     openModal('eventModal');
 }
 
@@ -623,26 +763,42 @@ function saveEvent() {
     const title = document.getElementById('eventTitle').value.trim();
     const date = document.getElementById('eventDate').value;
     const category = document.getElementById('eventCategory').value;
-    const description = document.getElementById('eventDescription').value.trim();
+    const description = eventDescriptionEditor.root.innerHTML.trim();
 
     if (!title || !date) {
         showToast('Please fill in all required fields', 'error');
         return;
     }
 
-    const newEvent = {
-        id: `event-${Date.now()}`,
-        title,
-        date,
-        category,
-        description
-    };
+    if (editingEventId) {
+        // Update existing event
+        const index = calendarEvents.findIndex(e => e.id === editingEventId);
+        if (index !== -1) {
+            calendarEvents[index] = {
+                ...calendarEvents[index],
+                title,
+                date,
+                category,
+                description
+            };
+            showToast('Event updated successfully');
+        }
+    } else {
+        // Add new event
+        const newEvent = {
+            id: `event-${Date.now()}`,
+            title,
+            date,
+            category,
+            description
+        };
+        calendarEvents.push(newEvent);
+        showToast('Event added successfully');
+    }
 
-    calendarEvents.push(newEvent);
     saveToStorage('ey-calendar-events', calendarEvents);
     renderCalendar();
     renderEvents();
-    showToast('Event added successfully');
     closeModal('eventModal');
 }
 
@@ -735,25 +891,173 @@ function renderSnapshotVisualization() {
             </div>
         </div>
 
-        <div class="snapshot-chart">
-            <h3 class="chart-title">Status Distribution</h3>
-            <div class="chart-bars">
-                ${Object.entries(statusCounts).map(([status, count]) => {
-                    const percentage = totalItems > 0 ? (count / totalItems) * 100 : 0;
-                    return `
-                        <div class="chart-bar-item">
-                            <div class="chart-bar-label">${status}</div>
-                            <div class="chart-bar-track">
-                                <div class="chart-bar-fill" style="width: ${percentage}%">
-                                    ${count} (${Math.round(percentage)}%)
+        <div class="snapshot-charts-grid">
+            <div class="snapshot-chart">
+                <h3 class="chart-title">Status Distribution (Bar)</h3>
+                <canvas id="statusBarChart"></canvas>
+            </div>
+            <div class="snapshot-chart">
+                <h3 class="chart-title">Status Distribution (Pie)</h3>
+                <canvas id="statusPieChart"></canvas>
+            </div>
+        </div>
+
+        <div class="snapshot-tasks-table">
+            <h3>All Tasks in Snapshot</h3>
+            <div class="snapshot-tasks-list">
+                ${actionItems.length === 0 ?
+                    '<p style="text-align: center; color: #A0AEC0; padding: 2rem;">No tasks to display</p>' :
+                    actionItems.map(item => `
+                        <div class="snapshot-task-card">
+                            <div class="snapshot-task-header">
+                                <div class="snapshot-task-title">${escapeHtml(item.description)}</div>
+                                <span class="status-pill status-${item.status.toLowerCase().replace(' ', '-')}">
+                                    ${item.status}
+                                </span>
+                            </div>
+                            <div class="snapshot-task-meta">
+                                <div class="snapshot-task-meta-item">
+                                    <div class="snapshot-task-meta-label">Owner</div>
+                                    <div class="snapshot-task-meta-value">${escapeHtml(item.owner)}</div>
+                                </div>
+                                <div class="snapshot-task-meta-item">
+                                    <div class="snapshot-task-meta-label">Taskforce</div>
+                                    <div class="snapshot-task-meta-value">${escapeHtml(item.taskforce)}</div>
+                                </div>
+                                <div class="snapshot-task-meta-item">
+                                    <div class="snapshot-task-meta-label">Due Date</div>
+                                    <div class="snapshot-task-meta-value">${formatDate(item.date)}</div>
+                                </div>
+                                <div class="snapshot-task-meta-item">
+                                    <div class="snapshot-task-meta-label">Last Updated</div>
+                                    <div class="snapshot-task-meta-value">${formatDateTime(item.lastUpdated)}</div>
                                 </div>
                             </div>
+                            ${item.notes ? `
+                                <div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid #E2E8F0;">
+                                    <div class="snapshot-task-meta-label" style="margin-bottom: 0.5rem;">Notes</div>
+                                    <div style="font-size: 0.875rem; color: #4A5568; line-height: 1.6;">${item.notes}</div>
+                                </div>
+                            ` : ''}
                         </div>
-                    `;
-                }).join('')}
+                    `).join('')
+                }
             </div>
         </div>
     `;
+
+    // Destroy existing charts if they exist
+    if (statusBarChart) statusBarChart.destroy();
+    if (statusPieChart) statusPieChart.destroy();
+
+    // Create charts after DOM is updated
+    setTimeout(() => {
+        createSnapshotCharts(statusCounts, totalItems);
+    }, 100);
+}
+
+function createSnapshotCharts(statusCounts, totalItems) {
+    const statusLabels = Object.keys(statusCounts);
+    const statusData = Object.values(statusCounts);
+    const statusColors = {
+        'Not Started': '#E2E8F0',
+        'In Progress': '#FED7AA',
+        'Blocked': '#FED7D7',
+        'Done': '#C6F6D5'
+    };
+    const statusBorderColors = {
+        'Not Started': '#CBD5E0',
+        'In Progress': '#ED8936',
+        'Blocked': '#E53E3E',
+        'Done': '#48BB78'
+    };
+
+    const backgroundColors = statusLabels.map(label => statusColors[label]);
+    const borderColors = statusLabels.map(label => statusBorderColors[label]);
+
+    // Bar Chart
+    const barCtx = document.getElementById('statusBarChart');
+    if (barCtx) {
+        statusBarChart = new Chart(barCtx, {
+            type: 'bar',
+            data: {
+                labels: statusLabels,
+                datasets: [{
+                    label: 'Number of Tasks',
+                    data: statusData,
+                    backgroundColor: backgroundColors,
+                    borderColor: borderColors,
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const percentage = totalItems > 0 ? ((context.parsed.y / totalItems) * 100).toFixed(1) : 0;
+                                return `${context.parsed.y} tasks (${percentage}%)`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Pie Chart
+    const pieCtx = document.getElementById('statusPieChart');
+    if (pieCtx) {
+        statusPieChart = new Chart(pieCtx, {
+            type: 'pie',
+            data: {
+                labels: statusLabels,
+                datasets: [{
+                    data: statusData,
+                    backgroundColor: backgroundColors,
+                    borderColor: borderColors,
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            font: {
+                                family: 'Inter',
+                                size: 12
+                            },
+                            padding: 15
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const percentage = totalItems > 0 ? ((context.parsed / totalItems) * 100).toFixed(1) : 0;
+                                return `${context.label}: ${context.parsed} tasks (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
 }
 
 // ============================================
