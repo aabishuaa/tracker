@@ -101,10 +101,68 @@ export function closeDetailsPanel() {
 export function renderDetailsPanel() {
     const panel = document.getElementById('detailsPanel');
 
+    // Get upcoming tasks (not done, sorted by due date)
+    const upcomingTasks = state.actionItems
+        .filter(item => item.status !== 'Done')
+        .sort((a, b) => new Date(a.date) - new Date(b.date))
+        .slice(0, 10); // Show top 10
+
+    if (upcomingTasks.length === 0) {
+        panel.innerHTML = `
+            <div class="upcoming-tasks-panel">
+                <div class="upcoming-tasks-header">
+                    <i class="fas fa-tasks"></i>
+                    <h3>Upcoming Tasks</h3>
+                </div>
+                <div class="upcoming-tasks-empty">
+                    <i class="fas fa-check-circle"></i>
+                    <p>All tasks completed!</p>
+                </div>
+            </div>
+        `;
+        return;
+    }
+
+    const tasksHtml = upcomingTasks.map(item => {
+        const daysUntilDue = Math.ceil((new Date(item.date) - new Date()) / (1000 * 60 * 60 * 24));
+        const isOverdue = daysUntilDue < 0;
+        const isDueSoon = daysUntilDue >= 0 && daysUntilDue <= 3;
+
+        return `
+            <div class="upcoming-task-card ${isOverdue ? 'overdue' : ''} ${isDueSoon ? 'due-soon' : ''}"
+                 onclick="window.actionItems.viewItemDetails('${item.id}')">
+                <div class="upcoming-task-header">
+                    <span class="status-pill status-${item.status.toLowerCase().replace(' ', '-')}">${item.status}</span>
+                    ${isOverdue ? '<span class="task-badge overdue-badge"><i class="fas fa-exclamation-circle"></i> Overdue</span>' : ''}
+                    ${isDueSoon && !isOverdue ? '<span class="task-badge due-soon-badge"><i class="fas fa-clock"></i> Due Soon</span>' : ''}
+                </div>
+                <div class="upcoming-task-title">${escapeHtml(item.description)}</div>
+                <div class="upcoming-task-meta">
+                    <div class="upcoming-task-meta-item">
+                        <i class="fas fa-user"></i>
+                        <span>${escapeHtml(item.owner)}</span>
+                    </div>
+                    <div class="upcoming-task-meta-item">
+                        <i class="fas fa-calendar"></i>
+                        <span>${formatDate(item.date)}</span>
+                        ${isOverdue ? `<span class="overdue-text">(${Math.abs(daysUntilDue)} days overdue)</span>` : ''}
+                        ${isDueSoon && !isOverdue ? `<span class="due-soon-text">(${daysUntilDue} days left)</span>` : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+
     panel.innerHTML = `
-        <div class="details-panel-empty">
-            <i class="fas fa-file-alt"></i>
-            <p>Select an action item to view details</p>
+        <div class="upcoming-tasks-panel">
+            <div class="upcoming-tasks-header">
+                <i class="fas fa-tasks"></i>
+                <h3>Upcoming Tasks</h3>
+                <span class="upcoming-tasks-count">${upcomingTasks.length}</span>
+            </div>
+            <div class="upcoming-tasks-list">
+                ${tasksHtml}
+            </div>
         </div>
     `;
 }
@@ -152,7 +210,7 @@ export function renderDetailsModal() {
         </div>
         <div class="detail-item">
             <div class="detail-label">Notes</div>
-            <div class="detail-value">${item.notes || '<em style="color: #A0AEC0;">No notes added yet</em>'}</div>
+            <div class="detail-value rich-text-content">${item.notes || '<em style="color: #A0AEC0;">No notes added yet</em>'}</div>
         </div>
         <div class="detail-item">
             <div class="detail-label">Last Updated</div>
