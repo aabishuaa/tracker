@@ -1865,3 +1865,318 @@ body {
     overflow-wrap: break-word;
     white-space: normal;
 }
+
+/* ============================================
+   EY OPENING ANIMATION
+   ============================================ */
+
+.ey-loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #FFE600 0%, #FFD700 50%, #FFE600 100%);
+    background-size: 200% 200%;
+    animation: gradientShift 3s ease infinite;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    opacity: 1;
+    transition: opacity 0.8s ease, visibility 0.8s ease;
+}
+
+.ey-loading-overlay.fade-out {
+    opacity: 0;
+    visibility: hidden;
+}
+
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.ey-animation-container {
+    text-align: center;
+    animation: containerFadeIn 0.8s ease forwards;
+}
+
+@keyframes containerFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.ey-logo-wrapper {
+    margin-bottom: 2rem;
+    animation: logoSlideIn 1s ease 0.3s backwards;
+}
+
+@keyframes logoSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.ey-logo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.ey-letter {
+    font-size: 8rem;
+    font-weight: 900;
+    color: #000000;
+    text-shadow:
+        0 0 20px rgba(0, 0, 0, 0.3),
+        0 0 40px rgba(0, 0, 0, 0.2),
+        0 0 60px rgba(0, 0, 0, 0.1);
+    letter-spacing: -0.05em;
+    animation: letterBounce 0.6s ease;
+}
+
+.ey-letter-e {
+    animation-delay: 0.5s;
+    animation: letterBounceE 0.6s ease 0.5s backwards;
+}
+
+.ey-letter-y {
+    animation-delay: 0.7s;
+    animation: letterBounceY 0.6s ease 0.7s backwards;
+}
+
+@keyframes letterBounceE {
+    0% {
+        opacity: 0;
+        transform: scale(0) rotate(-180deg);
+    }
+    60% {
+        transform: scale(1.2) rotate(10deg);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+    }
+}
+
+@keyframes letterBounceY {
+    0% {
+        opacity: 0;
+        transform: scale(0) rotate(180deg);
+    }
+    60% {
+        transform: scale(1.2) rotate(-10deg);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+    }
+}
+
+.ey-yellow-bar {
+    width: 200px;
+    height: 8px;
+    background-color: #000000;
+    margin: 0 auto;
+    border-radius: 4px;
+    animation: barExpand 0.8s ease 0.9s backwards;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes barExpand {
+    from {
+        width: 0;
+        opacity: 0;
+    }
+    to {
+        width: 200px;
+        opacity: 1;
+    }
+}
+
+.ey-tagline {
+    font-size: 3rem;
+    font-weight: 800;
+    color: #000000;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.75rem;
+    text-transform: uppercase;
+    animation: taglineFadeIn 0.8s ease 1.2s backwards;
+    text-shadow:
+        0 2px 10px rgba(0, 0, 0, 0.2),
+        0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+@keyframes taglineFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+        letter-spacing: 0.3em;
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+        letter-spacing: 0.05em;
+    }
+}
+
+.ey-subtitle {
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: #2D3748;
+    margin-bottom: 2rem;
+    animation: subtitleFadeIn 0.8s ease 1.5s backwards;
+}
+
+@keyframes subtitleFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.ey-loader {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-top: 2rem;
+    animation: loaderFadeIn 0.6s ease 1.8s backwards;
+}
+
+@keyframes loaderFadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.ey-loader-dot {
+    width: 16px;
+    height: 16px;
+    background-color: #000000;
+    border-radius: 50%;
+    animation: dotPulse 1.4s ease-in-out infinite;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.ey-loader-dot:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.ey-loader-dot:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.ey-loader-dot:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes dotPulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.5);
+        opacity: 0.5;
+    }
+}
+
+/* Responsive Animation */
+@media (max-width: 768px) {
+    .ey-letter {
+        font-size: 5rem;
+    }
+
+    .ey-tagline {
+        font-size: 2rem;
+    }
+
+    .ey-subtitle {
+        font-size: 1rem;
+    }
+
+    .ey-yellow-bar {
+        width: 150px;
+    }
+}
+
+/* ============================================
+   VIEWER MODE (READ-ONLY)
+   ============================================ */
+
+.viewer-mode-banner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(135deg, #4299E1 0%, #3182CE 100%);
+    color: #FFFFFF;
+    padding: 0.875rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    z-index: 9998;
+    font-size: 0.95rem;
+    font-weight: 600;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+    animation: bannerSlideDown 0.5s ease;
+}
+
+@keyframes bannerSlideDown {
+    from {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.viewer-mode-banner i {
+    font-size: 1.25rem;
+    animation: eyePulse 2s ease-in-out infinite;
+}
+
+@keyframes eyePulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.7;
+        transform: scale(1.1);
+    }
+}
+
+/* Adjust page layout when viewer banner is present */
+body:has(.viewer-mode-banner) .header {
+    top: 49px;
+}
+
+body:has(.viewer-mode-banner) {
+    padding-top: 49px;
+}
