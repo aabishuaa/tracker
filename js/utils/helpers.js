@@ -60,3 +60,31 @@ export function fuzzyMatch(text, search) {
     }
     return searchIndex === searchLower.length;
 }
+
+export function highlightText(text, search) {
+    if (!text || !search) return escapeHtml(text);
+
+    const textLower = text.toLowerCase();
+    const searchLower = search.toLowerCase();
+
+    // Try direct substring match first (case-insensitive)
+    const index = textLower.indexOf(searchLower);
+    if (index !== -1) {
+        const before = text.substring(0, index);
+        const match = text.substring(index, index + searchLower.length);
+        const after = text.substring(index + searchLower.length);
+        return `${escapeHtml(before)}<mark class="search-highlight">${escapeHtml(match)}</mark>${escapeHtml(after)}`;
+    }
+
+    // Try regex match (more flexible)
+    try {
+        // Escape special regex characters
+        const escapedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(`(${escapedSearch})`, 'gi');
+        const escaped = escapeHtml(text);
+        return escaped.replace(regex, '<mark class="search-highlight">$1</mark>');
+    } catch (e) {
+        // If regex fails, just return escaped text
+        return escapeHtml(text);
+    }
+}

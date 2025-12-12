@@ -4,9 +4,10 @@
 
 import { state } from '../core/state.js';
 import { saveToStorage } from '../services/storage.js';
-import { escapeHtml, formatDate, formatDateTime, formatDateLong, fuzzyMatch } from '../utils/helpers.js';
+import { escapeHtml, formatDate, formatDateTime, formatDateLong, fuzzyMatch, highlightText } from '../utils/helpers.js';
 import { openModal, closeModal } from '../ui/modals.js';
 import { showToast } from '../ui/toast.js';
+import { renderCalendar, renderEvents } from './calendar.js';
 
 // ============================================
 // RENDERING
@@ -50,12 +51,17 @@ export function renderActionItems() {
             row.style.backgroundColor = '#FFFEF0';
         }
 
+        // Apply highlighting if search is active
+        const description = searchTerm ? highlightText(item.description, searchTerm) : escapeHtml(item.description);
+        const owner = searchTerm ? highlightText(item.owner, searchTerm) : escapeHtml(item.owner);
+        const taskforce = searchTerm ? highlightText(item.taskforce, searchTerm) : escapeHtml(item.taskforce);
+
         row.innerHTML = `
             <td>
-                <div style="font-weight: 600;" class="text-wrap">${escapeHtml(item.description)}</div>
+                <div style="font-weight: 600;" class="text-wrap">${description}</div>
             </td>
-            <td class="text-wrap">${escapeHtml(item.owner)}</td>
-            <td class="text-wrap">${escapeHtml(item.taskforce)}</td>
+            <td class="text-wrap">${owner}</td>
+            <td class="text-wrap">${taskforce}</td>
             <td style="white-space: nowrap;">${formatDate(item.date)}</td>
             <td>
                 <span class="status-pill status-${item.status.toLowerCase().replace(' ', '-')}"
@@ -115,8 +121,8 @@ export function renderDetailsPanel() {
                     <h3>Upcoming Tasks</h3>
                 </div>
                 <div class="upcoming-tasks-empty">
-                    <i class="fas fa-check-circle"></i>
-                    <p>All tasks completed!</p>
+                    <i class="fas fa-inbox"></i>
+                    <p>There are no tasks</p>
                 </div>
             </div>
         `;
@@ -231,6 +237,42 @@ export function renderDetailsModal() {
 }
 
 // ============================================
+// DEADLINE EVENT HELPERS
+// ============================================
+
+function createDeadlineEvent(itemId, description, date, owner) {
+    const deadlineEvent = {
+        id: `event-deadline-${itemId}`,
+        title: `Deadline: ${description}`,
+        date: date,
+        category: 'Deadline',
+        description: `<p><strong>Owner:</strong> ${escapeHtml(owner)}</p><p>Action item deadline for: ${escapeHtml(description)}</p>`,
+        poster: null,
+        linkedItemId: itemId
+    };
+    state.calendarEvents.push(deadlineEvent);
+    saveToStorage('ey-calendar-events', state.calendarEvents);
+    renderCalendar();
+    renderEvents();
+}
+
+function updateDeadlineEvent(itemId, description, date, owner) {
+    const eventId = `event-deadline-${itemId}`;
+    const eventIndex = state.calendarEvents.findIndex(e => e.id === eventId);
+    if (eventIndex !== -1) {
+        state.calendarEvents[eventIndex] = {
+            ...state.calendarEvents[eventIndex],
+            title: `Deadline: ${description}`,
+            date: date,
+            description: `<p><strong>Owner:</strong> ${escapeHtml(owner)}</p><p>Action item deadline for: ${escapeHtml(description)}</p>`
+        };
+        saveToStorage('ey-calendar-events', state.calendarEvents);
+        renderCalendar();
+        renderEvents();
+    }
+}
+
+// ============================================
 // ADD/EDIT
 // ============================================
 
@@ -286,6 +328,7 @@ export function saveItem() {
         // Update existing item
         const index = state.actionItems.findIndex(i => i.id === state.editingItemId);
         if (index !== -1) {
+            const oldDate = state.actionItems[index].date;
             state.actionItems[index] = {
                 ...state.actionItems[index],
                 description,
@@ -296,12 +339,13 @@ export function saveItem() {
                 notes,
                 lastUpdated: new Date().toISOString()
             };
-            showToast('Action item updated successfully');
 
-            // If this item is currently selected, re-render details
-            if (state.selectedItemId === state.editingItemId) {
-                renderDetailsPanel();
+            // Update deadline event if date changed
+            if (oldDate !== date) {
+                updateDeadlineEvent(state.editingItemId, description, date, owner);
             }
+
+            showToast('Action item updated successfully');
         }
     } else {
         // Add new item
@@ -316,11 +360,16 @@ export function saveItem() {
             lastUpdated: new Date().toISOString()
         };
         state.actionItems.unshift(newItem);
+
+        // Create deadline event
+        createDeadlineEvent(newItem.id, description, date, owner);
+
         showToast('Action item added successfully');
     }
 
     saveToStorage('ey-action-items', state.actionItems);
     renderActionItems();
+    renderDetailsPanel(); // Always update sidebar
     closeModal('itemModal');
 }
 
@@ -339,6 +388,11 @@ export function deleteItem(id) {
         state.actionItems = state.actionItems.filter(i => i.id !== id);
         saveToStorage('ey-action-items', state.actionItems);
 
+        // Delete associated deadline event
+        const eventId = `event-deadline-${id}`;
+        state.calendarEvents = state.calendarEvents.filter(e => e.id !== eventId);
+        saveToStorage('ey-calendar-events', state.calendarEvents);
+
         // Clear selection if deleted item was selected
         if (state.selectedItemId === id) {
             state.selectedItemId = null;
@@ -346,6 +400,8 @@ export function deleteItem(id) {
 
         renderActionItems();
         renderDetailsPanel();
+        renderCalendar();
+        renderEvents();
         showToast('Action item deleted');
         closeModal('deleteModal');
     };
@@ -389,11 +445,7 @@ export function updateItemStatus(newStatus) {
         state.actionItems[index].lastUpdated = new Date().toISOString();
         saveToStorage('ey-action-items', state.actionItems);
         renderActionItems();
-
-        // Update details panel if this item is selected
-        if (state.selectedItemId === state.statusMenuItemId) {
-            renderDetailsPanel();
-        }
+        renderDetailsPanel(); // Always update sidebar
 
         showToast(`Status updated to "${newStatus}"`);
     }

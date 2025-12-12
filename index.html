@@ -82,7 +82,10 @@
                 <!-- Action Items Table Section -->
                 <div>
                     <div class="section-header">
-                        <h2 class="section-title">Action Items</h2>
+                        <div class="section-header-left">
+                            <h2 class="section-title">Action Items</h2>
+                            <div class="current-date-badge" id="currentDateBadge"></div>
+                        </div>
                         <div class="table-controls">
                             <div class="search-wrapper">
                                 <i class="fas fa-search search-icon"></i>
@@ -259,6 +262,16 @@
                             <option value="Workshop">Workshop</option>
                             <option value="Other">Other</option>
                         </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="eventPoster">Event Poster (optional)</label>
+                        <input type="file" class="form-input" id="eventPoster" accept="image/*">
+                        <div id="eventPosterPreview" class="poster-preview" style="display: none;">
+                            <img id="eventPosterImage" src="" alt="Event poster preview">
+                            <button type="button" class="btn btn-danger btn-sm" id="removePosterBtn" style="margin-top: 0.5rem;">
+                                <i class="fas fa-times"></i> Remove Poster
+                            </button>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label class="form-label" for="eventDescription">Description</label>

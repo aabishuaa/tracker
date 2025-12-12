@@ -106,43 +106,36 @@ export function renderSnapshotVisualization() {
 
         <div class="snapshot-tasks-table">
             <h3>All Tasks in Snapshot</h3>
-            <div class="snapshot-tasks-list">
+            <div class="snapshot-tasks-grid">
                 ${state.actionItems.length === 0 ?
                     '<p style="text-align: center; color: #A0AEC0; padding: 2rem;">No tasks to display</p>' :
-                    state.actionItems.map(item => `
-                        <div class="snapshot-task-card">
-                            <div class="snapshot-task-header">
+                    state.actionItems.map(item => {
+                        const daysUntilDue = Math.ceil((new Date(item.date) - new Date()) / (1000 * 60 * 60 * 24));
+                        const isOverdue = daysUntilDue < 0 && item.status !== 'Done';
+                        const isDueSoon = daysUntilDue >= 0 && daysUntilDue <= 3 && item.status !== 'Done';
+
+                        return `
+                            <div class="snapshot-task-card ${isOverdue ? 'overdue' : ''} ${isDueSoon ? 'due-soon' : ''}"
+                                 onclick="window.actionItems.viewItemDetails('${item.id}')">
+                                <div class="snapshot-task-header-badges">
+                                    <span class="status-pill status-${item.status.toLowerCase().replace(' ', '-')}">${item.status}</span>
+                                    ${isOverdue ? '<span class="task-badge overdue-badge"><i class="fas fa-exclamation-circle"></i> Overdue</span>' : ''}
+                                    ${isDueSoon && !isOverdue ? '<span class="task-badge due-soon-badge"><i class="fas fa-clock"></i> Due Soon</span>' : ''}
+                                </div>
                                 <div class="snapshot-task-title">${escapeHtml(item.description)}</div>
-                                <span class="status-pill status-${item.status.toLowerCase().replace(' ', '-')}">
-                                    ${item.status}
-                                </span>
-                            </div>
-                            <div class="snapshot-task-meta">
-                                <div class="snapshot-task-meta-item">
-                                    <div class="snapshot-task-meta-label">Owner</div>
-                                    <div class="snapshot-task-meta-value">${escapeHtml(item.owner)}</div>
-                                </div>
-                                <div class="snapshot-task-meta-item">
-                                    <div class="snapshot-task-meta-label">Taskforce</div>
-                                    <div class="snapshot-task-meta-value">${escapeHtml(item.taskforce)}</div>
-                                </div>
-                                <div class="snapshot-task-meta-item">
-                                    <div class="snapshot-task-meta-label">Due Date</div>
-                                    <div class="snapshot-task-meta-value">${formatDate(item.date)}</div>
-                                </div>
-                                <div class="snapshot-task-meta-item">
-                                    <div class="snapshot-task-meta-label">Last Updated</div>
-                                    <div class="snapshot-task-meta-value">${formatDateTime(item.lastUpdated)}</div>
+                                <div class="snapshot-task-info">
+                                    <div class="snapshot-task-info-item">
+                                        <i class="fas fa-user"></i>
+                                        <span>${escapeHtml(item.owner)}</span>
+                                    </div>
+                                    <div class="snapshot-task-info-item">
+                                        <i class="fas fa-calendar"></i>
+                                        <span>${formatDate(item.date)}</span>
+                                    </div>
                                 </div>
                             </div>
-                            ${item.notes ? `
-                                <div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid #E2E8F0;">
-                                    <div class="snapshot-task-meta-label" style="margin-bottom: 0.5rem;">Notes</div>
-                                    <div style="font-size: 0.875rem; color: #4A5568; line-height: 1.6;">${item.notes}</div>
-                                </div>
-                            ` : ''}
-                        </div>
-                    `).join('')
+                        `;
+                    }).join('')
                 }
             </div>
         </div>

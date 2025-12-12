@@ -36,6 +36,20 @@ import {
 // INITIALIZATION
 // ============================================
 
+function updateCurrentDate() {
+    const dateElement = document.getElementById('currentDateBadge');
+    if (dateElement) {
+        const now = new Date();
+        const formattedDate = now.toLocaleDateString('en-US', {
+            weekday: 'long',
+            month: 'long',
+            day: 'numeric',
+            year: 'numeric'
+        });
+        dateElement.innerHTML = `<i class="fas fa-calendar-day"></i> ${formattedDate}`;
+    }
+}
+
 function initializeApp() {
     // Load data from localStorage or use seed data
     state.actionItems = loadFromStorage('ey-action-items', seedActionItems);
@@ -49,6 +63,9 @@ function initializeApp() {
     initActionItemsGlobal();
     initCalendarGlobal();
     initSnapshotsGlobal();
+
+    // Update current date
+    updateCurrentDate();
 
     // Render initial views
     renderActionItems();
@@ -95,6 +112,27 @@ function attachEventListeners() {
     document.getElementById('saveEventBtn').addEventListener('click', saveEvent);
     document.getElementById('cancelEventBtn').addEventListener('click', () => closeModal('eventModal'));
     document.getElementById('closeEventModal').addEventListener('click', () => closeModal('eventModal'));
+
+    // Event poster upload
+    document.getElementById('eventPoster').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                state.currentEventPoster = event.target.result;
+                document.getElementById('eventPosterImage').src = event.target.result;
+                document.getElementById('eventPosterPreview').style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Remove poster button
+    document.getElementById('removePosterBtn').addEventListener('click', () => {
+        state.currentEventPoster = null;
+        document.getElementById('eventPoster').value = '';
+        document.getElementById('eventPosterPreview').style.display = 'none';
+    });
 
     // Calendar navigation
     document.getElementById('prevMonthBtn').addEventListener('click', () => navigateMonth(-1));
