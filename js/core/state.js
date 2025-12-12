@@ -13,6 +13,7 @@ export const state = {
     deleteCallback: null,
     selectedItemId: null,
     statusMenuItemId: null,
+    currentEventPoster: null,
 
     // Rich Text Editors
     itemNotesEditor: null,

@@ -116,27 +116,31 @@ export function renderEvents() {
         eventCard.className = 'event-card';
 
         const iconClass = getEventIconClass(event.category);
+        const posterHtml = event.poster ? `<img src="${event.poster}" alt="${escapeHtml(event.title)}" class="event-card-poster">` : '';
 
         eventCard.innerHTML = `
-            <div class="event-card-header">
-                <div class="event-icon">
-                    <i class="${iconClass}"></i>
+            ${posterHtml}
+            <div class="event-card-content">
+                <div class="event-card-header">
+                    <div class="event-icon">
+                        <i class="${iconClass}"></i>
+                    </div>
+                    <div class="event-details">
+                        <div class="event-title">${escapeHtml(event.title)}</div>
+                        <div class="event-date">${formatDateLong(event.date)}</div>
+                    </div>
                 </div>
-                <div class="event-details">
-                    <div class="event-title">${escapeHtml(event.title)}</div>
-                    <div class="event-date">${formatDateLong(event.date)}</div>
-                </div>
-            </div>
-            <div class="event-description">${event.description}</div>
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span class="event-category">${event.category}</span>
-                <div class="event-actions">
-                    <button class="btn btn-secondary btn-sm" onclick="window.calendar.editEvent('${event.id}')" title="Edit">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="btn btn-danger btn-sm" onclick="window.calendar.deleteEvent('${event.id}')" title="Delete">
-                        <i class="fas fa-trash"></i>
-                    </button>
+                <div class="event-description">${event.description}</div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span class="event-category">${event.category}</span>
+                    <div class="event-actions">
+                        <button class="btn btn-secondary btn-sm" onclick="window.calendar.editEvent('${event.id}')" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="window.calendar.deleteEvent('${event.id}')" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
         `;
@@ -162,9 +166,11 @@ function getEventIconClass(category) {
 
 export function openAddEventModal() {
     state.editingEventId = null;
+    state.currentEventPoster = null;
     document.getElementById('eventForm').reset();
     document.getElementById('eventDate').valueAsDate = new Date();
     state.eventDescriptionEditor.setContents([]);
+    document.getElementById('eventPosterPreview').style.display = 'none';
     document.querySelector('#eventModal .modal-title').textContent = 'Add Calendar Event';
     document.getElementById('saveEventBtn').textContent = 'Add Event';
     openModal('eventModal');
@@ -175,6 +181,7 @@ export function editEvent(id) {
     if (!event) return;
 
     state.editingEventId = id;
+    state.currentEventPoster = event.poster || null;
     document.getElementById('eventTitle').value = event.title;
     document.getElementById('eventDate').value = event.date;
     document.getElementById('eventCategory').value = event.category;
@@ -190,6 +197,14 @@ export function editEvent(id) {
         state.eventDescriptionEditor.setContents([]);
     }
 
+    // Show poster preview if exists
+    if (event.poster) {
+        document.getElementById('eventPosterImage').src = event.poster;
+        document.getElementById('eventPosterPreview').style.display = 'block';
+    } else {
+        document.getElementById('eventPosterPreview').style.display = 'none';
+    }
+
     document.querySelector('#eventModal .modal-title').textContent = 'Edit Calendar Event';
     document.getElementById('saveEventBtn').textContent = 'Save Changes';
     openModal('eventModal');
@@ -200,6 +215,7 @@ export function saveEvent() {
     const date = document.getElementById('eventDate').value;
     const category = document.getElementById('eventCategory').value;
     const description = state.eventDescriptionEditor.root.innerHTML.trim();
+    const poster = state.currentEventPoster || null;
 
     if (!title || !date) {
         showToast('Please fill in all required fields', 'error');
@@ -215,7 +231,8 @@ export function saveEvent() {
                 title,
                 date,
                 category,
-                description
+                description,
+                poster
             };
             showToast('Event updated successfully');
         }
@@ -226,7 +243,8 @@ export function saveEvent() {
             title,
             date,
             category,
-            description
+            description,
+            poster
         };
         state.calendarEvents.push(newEvent);
         showToast('Event added successfully');
