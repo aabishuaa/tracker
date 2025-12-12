@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - master
+      - claude/add-deployment-authentication-01GFsqsJj9xiu5CZnzZKsBBs
   pull_request:
     types: [opened, synchronize, reopened, closed]
     branches:
