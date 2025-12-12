@@ -5,6 +5,7 @@
 import { state, seedActionItems, seedEvents } from './state.js';
 import { loadFromStorage } from '../services/storage.js';
 import { initializeEditors } from '../utils/editors.js';
+import { initializeViewerMode, isViewerMode } from '../utils/viewerMode.js';
 import { switchTab } from '../ui/tabs.js';
 import { closeModal } from '../ui/modals.js';
 import {
@@ -75,6 +76,27 @@ function initializeApp() {
 
     // Attach event listeners
     attachEventListeners();
+
+    // Initialize viewer mode if applicable
+    initializeViewerMode();
+
+    // Hide loading animation after everything is ready
+    hideLoadingAnimation();
+}
+
+// Hide the EY loading animation
+function hideLoadingAnimation() {
+    const overlay = document.getElementById('eyLoadingOverlay');
+    if (overlay) {
+        // Wait for animation sequence to complete (about 2.5 seconds), then fade out
+        setTimeout(() => {
+            overlay.classList.add('fade-out');
+            // Remove from DOM after fade transition
+            setTimeout(() => {
+                overlay.remove();
+            }, 800);
+        }, 2500);
+    }
 }
 
 // ============================================

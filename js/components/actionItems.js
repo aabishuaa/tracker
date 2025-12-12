@@ -8,6 +8,7 @@ import { escapeHtml, formatDate, formatDateTime, formatDateLong, fuzzyMatch, hig
 import { openModal, closeModal } from '../ui/modals.js';
 import { showToast } from '../ui/toast.js';
 import { renderCalendar, renderEvents } from './calendar.js';
+import { isViewerMode } from '../utils/viewerMode.js';
 
 // ============================================
 // RENDERING
@@ -56,6 +57,24 @@ export function renderActionItems() {
         const owner = searchTerm ? highlightText(item.owner, searchTerm) : escapeHtml(item.owner);
         const taskforce = searchTerm ? highlightText(item.taskforce, searchTerm) : escapeHtml(item.taskforce);
 
+        // Determine which action buttons to show based on viewer mode
+        const viewerMode = isViewerMode();
+        const actionButtons = viewerMode ? `
+            <button class="btn btn-secondary btn-sm" onclick="window.actionItems.viewItemDetails('${item.id}')" title="View Details">
+                <i class="fas fa-eye"></i>
+            </button>
+        ` : `
+            <button class="btn btn-secondary btn-sm" onclick="window.actionItems.viewItemDetails('${item.id}')" title="View Details">
+                <i class="fas fa-eye"></i>
+            </button>
+            <button class="btn btn-secondary btn-sm" onclick="window.actionItems.editItem('${item.id}')" title="Edit">
+                <i class="fas fa-edit"></i>
+            </button>
+            <button class="btn btn-danger btn-sm" onclick="window.actionItems.deleteItem('${item.id}')" title="Delete">
+                <i class="fas fa-trash"></i>
+            </button>
+        `;
+
         row.innerHTML = `
             <td>
                 <div style="font-weight: 600;" class="text-wrap">${description}</div>
@@ -65,21 +84,14 @@ export function renderActionItems() {
             <td style="white-space: nowrap;">${formatDate(item.date)}</td>
             <td>
                 <span class="status-pill status-${item.status.toLowerCase().replace(' ', '-')}"
-                      onclick="window.actionItems.openStatusMenu('${item.id}', event)">
+                      ${viewerMode ? '' : `onclick="window.actionItems.openStatusMenu('${item.id}', event)"`}
+                      style="${viewerMode ? 'cursor: default;' : ''}">
                     ${item.status}
                 </span>
             </td>
             <td>
                 <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                    <button class="btn btn-secondary btn-sm" onclick="window.actionItems.viewItemDetails('${item.id}')" title="View Details">
-                        <i class="fas fa-eye"></i>
-                    </button>
-                    <button class="btn btn-secondary btn-sm" onclick="window.actionItems.editItem('${item.id}')" title="Edit">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="btn btn-danger btn-sm" onclick="window.actionItems.deleteItem('${item.id}')" title="Delete">
-                        <i class="fas fa-trash"></i>
-                    </button>
+                    ${actionButtons}
                 </div>
             </td>
         `;
