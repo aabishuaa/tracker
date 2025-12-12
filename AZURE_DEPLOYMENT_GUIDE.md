@@ -9,11 +9,12 @@ This guide will walk you through deploying the EY AI Taskforce Tracker to Micros
 1. [Prerequisites](#prerequisites)
 2. [Quick Start (5 minutes)](#quick-start)
 3. [Detailed Step-by-Step Guide](#detailed-step-by-step-guide)
-4. [Sharing with Team Members](#sharing-with-team-members)
-5. [Viewer Mode (Read-Only Access)](#viewer-mode-read-only-access)
-6. [Updating Your Deployment](#updating-your-deployment)
-7. [Troubleshooting](#troubleshooting)
-8. [Cost Information](#cost-information)
+4. [🔒 Authentication & Access Control](#-authentication--access-control)
+5. [Sharing with Team Members](#sharing-with-team-members)
+6. [Viewer Mode (Read-Only Access)](#viewer-mode-read-only-access)
+7. [Updating Your Deployment](#updating-your-deployment)
+8. [Troubleshooting](#troubleshooting)
+9. [Cost Information](#cost-information)
 
 ---
 
@@ -162,6 +163,73 @@ Before you begin, make sure you have:
    - Click the "Actions" tab
    - You should see a workflow run (green checkmark = success)
    - This workflow was automatically created by Azure
+
+---
+
+## 🔒 Authentication & Access Control
+
+### Why Add Authentication?
+
+By default, anyone with your app URL can access it. If you want to protect your data and restrict access to specific users, you can enable **Azure Active Directory authentication**.
+
+### Benefits of Authentication:
+
+- ✅ **Secure Access** - Only authenticated users can view your app
+- ✅ **Enterprise Login** - Users sign in with their work email (e.g., yourname@ey.com)
+- ✅ **Email Allowlist** - Restrict to specific users or domains
+- ✅ **Free Tier Compatible** - Works on Azure Static Web Apps free tier
+- ✅ **Professional** - Enterprise-grade security with Microsoft accounts
+
+### 🚀 Quick Setup
+
+**👉 See [AUTHENTICATION_GUIDE.md](AUTHENTICATION_GUIDE.md) for complete setup instructions**
+
+**Summary of steps:**
+1. Create Azure AD App Registration (5 minutes)
+2. Configure redirect URI and get client ID/secret
+3. Add secrets to your Static Web App configuration
+4. Push your code (authentication is already configured!)
+5. Test with your work email
+
+### Access Control Options
+
+**Option 1: Allow specific email addresses**
+```javascript
+// Edit js/utils/auth.js
+const AUTHORIZED_EMAILS = [
+    'john.doe@ey.com',
+    'jane.smith@ey.com',
+];
+```
+
+**Option 2: Allow entire domain**
+```javascript
+// Edit js/utils/auth.js
+const ALLOW_DOMAIN_MODE = true;
+const ALLOWED_DOMAINS = ['ey.com'];
+```
+
+**Option 3: Allow all authenticated users**
+- Leave arrays empty in `auth.js`
+- Any user who can log in with Microsoft gets access
+
+### What Users See
+
+**Authorized users:**
+- See their email in the header
+- Full access to all features
+- Logout button available
+
+**Unauthorized users:**
+- "Access Denied" page with their email
+- Cannot access app features
+- Option to logout and try another account
+
+**Unauthenticated visitors:**
+- Immediately redirected to Microsoft login
+- Must authenticate before seeing any content
+
+For complete setup instructions, see **[AUTHENTICATION_GUIDE.md](AUTHENTICATION_GUIDE.md)**
 
 ---
 
@@ -441,8 +509,8 @@ After deploying:
 
 - **Data Privacy**: All data is stored in browser localStorage (client-side only)
 - **No Backend**: This is a static app with no server-side processing
-- **No Authentication**: URLs are public (use strong naming for security through obscurity)
-- **For True Security**: Consider implementing Azure AD authentication (requires paid tier)
+- **Authentication Available**: Azure AD authentication is configured (see AUTHENTICATION_GUIDE.md)
+- **Free Tier**: Authentication works on the free tier with no additional costs
 
 ---
 

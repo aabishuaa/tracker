@@ -9,6 +9,7 @@ Enterprise project management tracker built with **vanilla HTML, CSS, and JavaSc
 ## ✨ New Features
 
 - 🎬 **EY Branded Opening Animation** - Eye-catching yellow animation with "AI Taskforce" branding
+- 🔒 **Azure AD Authentication** - Secure access with enterprise email login (see [AUTHENTICATION_GUIDE.md](AUTHENTICATION_GUIDE.md))
 - 👁️ **Viewer Mode** - Read-only access for team members (add `?mode=view` to URL)
 - ☁️ **Azure Deployment Ready** - Optimized for Azure Static Web Apps (Free tier)
 - 🔄 **Auto-Deploy with GitHub Actions** - Automatic deployment on git push
@@ -65,6 +66,31 @@ http-server -p 8080
 php -S localhost:8080
 ```
 
+## 🔒 Authentication & Security
+
+### Azure AD Authentication (Optional but Recommended)
+
+Protect your deployment with enterprise-grade authentication:
+
+**👉 See [AUTHENTICATION_GUIDE.md](AUTHENTICATION_GUIDE.md) for complete setup**
+
+**What you get:**
+- ✅ Secure login with Microsoft/work email
+- ✅ Restrict access to specific users or domains
+- ✅ Free tier compatible (no additional costs)
+- ✅ Professional authentication UI
+- ✅ Login/logout functionality
+
+**Quick setup:**
+1. Create Azure AD App Registration
+2. Add secrets to your Static Web App
+3. Configure allowed users in `js/utils/auth.js`
+4. Deploy!
+
+Without authentication, anyone with your URL can access the app.
+
+---
+
 ## 👥 Team Collaboration
 
 ### For Admins (You)
@@ -86,15 +112,18 @@ They can view all data but cannot make changes.
 - ✅ Blue banner indicates read-only mode
 - ❌ Cannot add, edit, or delete items
 
+**Note:** When authentication is enabled, all users (including viewers) must log in first.
+
 ## Project Structure
 
 ```
 tracker/
 ├── index.html                          # Main HTML structure
 ├── styles.css                          # All styling including animations
-├── staticwebapp.config.json           # Azure configuration
+├── staticwebapp.config.json           # Azure configuration (includes auth)
 ├── README.md                          # This file
 ├── AZURE_DEPLOYMENT_GUIDE.md          # Deployment guide
+├── AUTHENTICATION_GUIDE.md            # Authentication setup guide
 ├── .github/
 │   └── workflows/
 │       └── azure-static-web-apps.yml  # Auto-deployment workflow
@@ -113,6 +142,7 @@ tracker/
     │   ├── tabs.js                    # Tab navigation
     │   └── toast.js                   # Toast notifications
     └── utils/
+        ├── auth.js                    # Azure AD authentication & authorization
         ├── editors.js                 # Rich text editor setup
         ├── helpers.js                 # Helper functions
         └── viewerMode.js              # Viewer mode functionality
