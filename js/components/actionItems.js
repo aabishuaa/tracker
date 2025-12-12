@@ -82,19 +82,14 @@ export function renderActionItems() {
 }
 
 // ============================================
-// DETAILS PANEL
+// DETAILS MODAL
 // ============================================
 
 export function viewItemDetails(id) {
     state.selectedItemId = id;
     renderActionItems();
-    renderDetailsPanel();
-
-    // Scroll details panel into view on mobile
-    const detailsPanel = document.getElementById('detailsPanel');
-    if (window.innerWidth <= 1400) {
-        detailsPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
+    renderDetailsModal();
+    openModal('itemDetailsModal');
 }
 
 export function closeDetailsPanel() {
@@ -106,74 +101,75 @@ export function closeDetailsPanel() {
 export function renderDetailsPanel() {
     const panel = document.getElementById('detailsPanel');
 
+    panel.innerHTML = `
+        <div class="details-panel-empty">
+            <i class="fas fa-file-alt"></i>
+            <p>Select an action item to view details</p>
+        </div>
+    `;
+}
+
+export function renderDetailsModal() {
+    const contentDiv = document.getElementById('itemDetailsContent');
+
     if (!state.selectedItemId) {
-        panel.innerHTML = `
-            <div class="details-panel-empty">
-                <i class="fas fa-file-alt"></i>
-                <p>Select an action item to view details</p>
-            </div>
-        `;
+        contentDiv.innerHTML = '<p>No item selected</p>';
         return;
     }
 
     const item = state.actionItems.find(i => i.id === state.selectedItemId);
     if (!item) {
-        closeDetailsPanel();
+        closeModal('itemDetailsModal');
+        state.selectedItemId = null;
+        renderActionItems();
         return;
     }
 
-    panel.innerHTML = `
-        <div class="details-header">
-            <h3 class="details-title">Item Details</h3>
-            <button class="details-close" onclick="window.actionItems.closeDetailsPanel()">
-                <i class="fas fa-times"></i>
-            </button>
+    contentDiv.innerHTML = `
+        <div class="detail-item">
+            <div class="detail-label">Task Name / Description</div>
+            <div class="detail-value large">${escapeHtml(item.description)}</div>
         </div>
-        <div class="details-content">
-            <div class="detail-item">
-                <div class="detail-label">Task Name / Description</div>
-                <div class="detail-value large">${escapeHtml(item.description)}</div>
+        <div class="detail-item">
+            <div class="detail-label">Owner</div>
+            <div class="detail-value">${escapeHtml(item.owner)}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Taskforce Members</div>
+            <div class="detail-value">${escapeHtml(item.taskforce)}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Due Date</div>
+            <div class="detail-value">${formatDateLong(item.date)}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Status</div>
+            <div class="detail-value">
+                <span class="status-pill status-${item.status.toLowerCase().replace(' ', '-')}">
+                    ${item.status}
+                </span>
             </div>
-            <div class="detail-item">
-                <div class="detail-label">Owner</div>
-                <div class="detail-value">${escapeHtml(item.owner)}</div>
-            </div>
-            <div class="detail-item">
-                <div class="detail-label">Taskforce Members</div>
-                <div class="detail-value">${escapeHtml(item.taskforce)}</div>
-            </div>
-            <div class="detail-item">
-                <div class="detail-label">Due Date</div>
-                <div class="detail-value">${formatDateLong(item.date)}</div>
-            </div>
-            <div class="detail-item">
-                <div class="detail-label">Status</div>
-                <div class="detail-value">
-                    <span class="status-pill status-${item.status.toLowerCase().replace(' ', '-')}">
-                        ${item.status}
-                    </span>
-                </div>
-            </div>
-            <div class="detail-item">
-                <div class="detail-label">Notes</div>
-                <div class="detail-value">${item.notes || '<em style="color: #A0AEC0;">No notes added yet</em>'}</div>
-            </div>
-            <div class="detail-item">
-                <div class="detail-label">Last Updated</div>
-                <div class="detail-value">${formatDateTime(item.lastUpdated)}</div>
-            </div>
-            <div class="detail-actions">
-                <button class="btn btn-primary" onclick="window.actionItems.editItem('${item.id}')">
-                    <i class="fas fa-edit"></i>
-                    Edit Item
-                </button>
-                <button class="btn btn-danger" onclick="window.actionItems.deleteItem('${item.id}')">
-                    <i class="fas fa-trash"></i>
-                    Delete
-                </button>
-            </div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Notes</div>
+            <div class="detail-value">${item.notes || '<em style="color: #A0AEC0;">No notes added yet</em>'}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Last Updated</div>
+            <div class="detail-value">${formatDateTime(item.lastUpdated)}</div>
         </div>
     `;
+
+    // Update button handlers
+    document.getElementById('editItemDetailsBtn').onclick = () => {
+        closeModal('itemDetailsModal');
+        editItem(item.id);
+    };
+
+    document.getElementById('deleteItemDetailsBtn').onclick = () => {
+        closeModal('itemDetailsModal');
+        deleteItem(item.id);
+    };
 }
 
 // ============================================

@@ -1139,6 +1139,18 @@ body {
     transform: scale(1);
 }
 
+.modal-content-large {
+    max-width: 800px;
+}
+
+.modal-content-large .detail-item {
+    margin-bottom: 1.5rem;
+}
+
+.modal-content-large .detail-item:last-child {
+    margin-bottom: 0;
+}
+
 .modal-header {
     padding: 1.5rem 2rem;
     border-bottom: 2px solid #E2E8F0;
