@@ -1,8 +1,8 @@
-# EY AI Taskforce Tracker
+# AI Taskforce Tracker
 
 Enterprise project management tracker built with **vanilla HTML, CSS, and JavaScript**. No frameworks, no build tools, no dependencies.
 
-![EY Yellow](https://img.shields.io/badge/EY-Yellow-FFE600?style=for-the-badge)
+![Yellow](https://img.shields.io/badge/EY-Yellow-FFE600?style=for-the-badge)
 ![Azure](https://img.shields.io/badge/Azure-Ready-0089D6?style=for-the-badge&logo=microsoft-azure)
 ![Status](https://img.shields.io/badge/Status-Production%20Ready-success?style=for-the-badge)
 
