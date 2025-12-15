@@ -574,7 +574,6 @@ export function exportCalendarToExcel() {
     };
 
     // Generate filename
-    const today = new Date();
     const filename = `EY-Calendar-Events-${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}.xlsx`;
 
     // Download
