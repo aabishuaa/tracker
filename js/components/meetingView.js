@@ -5,6 +5,8 @@
 
 import { state } from '../core/state.js';
 import { escapeHtml, formatDate, formatDateLong } from '../utils/helpers.js';
+import { saveToStorage } from '../services/storage.js';
+import { showToast } from '../ui/toast.js';
 
 // Meeting view state
 const meetingState = {
@@ -70,6 +72,34 @@ function openCardModal(itemId) {
             </button>
         </div>
 
+        <div class="meeting-modal-status-update">
+            <div class="meeting-modal-status-label">
+                <i class="fas fa-edit"></i> Update Status
+            </div>
+            <div class="meeting-modal-status-buttons">
+                <button class="meeting-status-btn not-started ${item.status === 'Not Started' ? 'active' : ''}"
+                        onclick="window.meetingView.updateStatus('${item.id}', 'Not Started')">
+                    <i class="fas fa-circle"></i>
+                    Not Started
+                </button>
+                <button class="meeting-status-btn in-progress ${item.status === 'In Progress' ? 'active' : ''}"
+                        onclick="window.meetingView.updateStatus('${item.id}', 'In Progress')">
+                    <i class="fas fa-spinner"></i>
+                    In Progress
+                </button>
+                <button class="meeting-status-btn blocked ${item.status === 'Blocked' ? 'active' : ''}"
+                        onclick="window.meetingView.updateStatus('${item.id}', 'Blocked')">
+                    <i class="fas fa-ban"></i>
+                    Blocked
+                </button>
+                <button class="meeting-status-btn done ${item.status === 'Done' ? 'active' : ''}"
+                        onclick="window.meetingView.updateStatus('${item.id}', 'Done')">
+                    <i class="fas fa-check-circle"></i>
+                    Done
+                </button>
+            </div>
+        </div>
+
         <div class="meeting-modal-body">
             <h2 class="meeting-modal-title">${escapeHtml(item.description)}</h2>
 
@@ -123,6 +153,27 @@ function openCardModal(itemId) {
 function closeCardModal() {
     const modal = document.getElementById('meetingCardModal');
     modal.classList.remove('active');
+}
+
+/**
+ * Update item status from meeting view modal
+ */
+function updateMeetingItemStatus(itemId, newStatus) {
+    const index = state.actionItems.findIndex(i => i.id === itemId);
+    if (index !== -1) {
+        state.actionItems[index].status = newStatus;
+        state.actionItems[index].lastUpdated = new Date().toISOString();
+        saveToStorage('ey-action-items', state.actionItems);
+
+        // Refresh the modal to show updated status
+        openCardModal(itemId);
+
+        // Refresh stats and items
+        renderStats();
+        renderItems();
+
+        showToast(`Status updated to "${newStatus}"`);
+    }
 }
 
 /**
@@ -546,6 +597,7 @@ export function initMeetingViewGlobal() {
         open: openMeetingView,
         close: closeMeetingView,
         openModal: openCardModal,
-        closeModal: closeCardModal
+        closeModal: closeCardModal,
+        updateStatus: updateMeetingItemStatus
     };
 }
