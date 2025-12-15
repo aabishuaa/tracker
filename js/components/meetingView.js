@@ -11,7 +11,8 @@ const meetingState = {
     currentFilter: 'all',
     currentPage: 1,
     itemsPerPage: 5,
-    filteredItems: []
+    filteredItems: [],
+    expandedCards: new Set() // Track which cards are expanded
 };
 
 /**
@@ -21,6 +22,18 @@ function stripHtml(html) {
     const tmp = document.createElement('div');
     tmp.innerHTML = html;
     return tmp.textContent || tmp.innerText || '';
+}
+
+/**
+ * Toggle card expansion
+ */
+function toggleCardExpansion(itemId) {
+    if (meetingState.expandedCards.has(itemId)) {
+        meetingState.expandedCards.delete(itemId);
+    } else {
+        meetingState.expandedCards.add(itemId);
+    }
+    renderItems();
 }
 
 /**
@@ -228,9 +241,14 @@ function renderItems() {
             const notes = item.notes ? stripHtml(item.notes) : '';
             const statusClass = item.status.toLowerCase().replace(' ', '-');
             const itemNumber = startIndex + index + 1;
+            const isExpanded = meetingState.expandedCards.has(item.id);
+
+            if (isExpanded) {
+                itemClass += ' expanded';
+            }
 
             return `
-                <div class="${itemClass}">
+                <div class="${itemClass}" onclick="window.meetingView.toggleCard('${item.id}')">
                     <div class="meeting-item-header-row">
                         <div class="meeting-item-number-badge">#${itemNumber}</div>
                         <div class="meeting-item-status-badge ${statusClass}">
@@ -241,45 +259,61 @@ function renderItems() {
                             ${item.status}
                         </div>
                         ${priorityBadge}
+                        <div class="meeting-card-expand-icon">
+                            <i class="fas fa-chevron-${isExpanded ? 'up' : 'down'}"></i>
+                        </div>
                     </div>
 
                     <div class="meeting-item-title">${escapeHtml(item.description)}</div>
 
-                    <div class="meeting-item-details-grid">
-                        <div class="meeting-item-detail">
-                            <div class="meeting-item-detail-label">
-                                <i class="fas fa-user"></i> Owner
+                    <div class="meeting-item-summary">
+                        <div class="meeting-item-summary-row">
+                            <span class="meeting-item-summary-label">
+                                <i class="fas fa-user"></i> ${escapeHtml(item.owner)}
+                            </span>
+                            <span class="meeting-item-summary-label ${isOverdue ? 'overdue-text' : ''}">
+                                <i class="fas fa-calendar"></i> ${formatDateLong(item.date)}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="meeting-item-expandable ${isExpanded ? 'expanded' : ''}">
+                        <div class="meeting-item-details-grid">
+                            <div class="meeting-item-detail">
+                                <div class="meeting-item-detail-label">
+                                    <i class="fas fa-user"></i> Owner
+                                </div>
+                                <div class="meeting-item-detail-value">${escapeHtml(item.owner)}</div>
                             </div>
-                            <div class="meeting-item-detail-value">${escapeHtml(item.owner)}</div>
+
+                            ${item.taskforce ? `
+                            <div class="meeting-item-detail">
+                                <div class="meeting-item-detail-label">
+                                    <i class="fas fa-users"></i> Taskforce
+                                </div>
+                                <div class="meeting-item-detail-value">${escapeHtml(item.taskforce)}</div>
+                            </div>
+                            ` : ''}
+
+                            <div class="meeting-item-detail">
+                                <div class="meeting-item-detail-label">
+                                    <i class="fas fa-calendar"></i> Due Date
+                                </div>
+                                <div class="meeting-item-detail-value ${isOverdue ? 'overdue-text' : ''}">
+                                    ${formatDateLong(item.date)}
+                                </div>
+                            </div>
                         </div>
 
-                        ${item.taskforce ? `
-                        <div class="meeting-item-detail">
-                            <div class="meeting-item-detail-label">
-                                <i class="fas fa-users"></i> Taskforce
+                        ${notes ? `
+                        <div class="meeting-item-notes-section">
+                            <div class="meeting-item-notes-label">
+                                <i class="fas fa-sticky-note"></i> Notes
                             </div>
-                            <div class="meeting-item-detail-value">${escapeHtml(item.taskforce)}</div>
+                            <div class="meeting-item-notes-content">${escapeHtml(notes)}</div>
                         </div>
                         ` : ''}
-
-                        <div class="meeting-item-detail">
-                            <div class="meeting-item-detail-label">
-                                <i class="fas fa-calendar"></i> Due Date
-                            </div>
-                            <div class="meeting-item-detail-value ${isOverdue ? 'overdue-text' : ''}">
-                                ${formatDateLong(item.date)}
-                            </div>
-                        </div>
                     </div>
-
-                    ${notes ? `
-                    <div class="meeting-item-notes-section">
-                        <div class="meeting-item-notes-label">
-                            <i class="fas fa-sticky-note"></i> Notes
-                        </div>
-                        <div class="meeting-item-notes-content">${escapeHtml(notes)}</div>
-                    </div>
-                    ` : ''}
                 </div>
             `;
         }).join('');
@@ -453,6 +487,7 @@ export function initMeetingView() {
 export function initMeetingViewGlobal() {
     window.meetingView = {
         open: openMeetingView,
-        close: closeMeetingView
+        close: closeMeetingView,
+        toggleCard: toggleCardExpansion
     };
 }
