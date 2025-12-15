@@ -2923,7 +2923,7 @@ body:has(.viewer-mode-banner) {
     overflow-x: hidden;
     padding: 2rem 3rem;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(450px, 100%), 1fr));
     gap: 1.5rem;
     align-content: start;
     max-width: 100%;
@@ -2932,11 +2932,16 @@ body:has(.viewer-mode-banner) {
 .meeting-action-item {
     background: white;
     border-radius: 12px;
-    padding: 2rem;
+    padding: 1.75rem;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     border: 2px solid #E2E8F0;
     transition: all 0.3s ease;
     animation: slideIn 0.4s ease;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    max-width: 100%;
+    min-height: 0;
 }
 
 @keyframes slideIn {
@@ -2979,17 +2984,20 @@ body:has(.viewer-mode-banner) {
     justify-content: space-between;
     align-items: flex-start;
     gap: 1rem;
-    margin-bottom: 1.25rem;
-    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.875rem;
     border-bottom: 2px solid #F7FAFC;
 }
 
 .meeting-item-title {
-    font-size: 1.35rem;
+    font-size: 1.25rem;
     font-weight: 700;
     color: #2D3748;
-    line-height: 1.3;
+    line-height: 1.4;
     flex: 1;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
 }
 
 .meeting-item-status {
@@ -3026,7 +3034,7 @@ body:has(.viewer-mode-banner) {
 .meeting-item-details {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 0.875rem;
 }
 
 .meeting-item-row {
@@ -3056,6 +3064,9 @@ body:has(.viewer-mode-banner) {
     flex: 1;
     font-size: 1rem;
     line-height: 1.5;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
 }
 
 .meeting-item-value.overdue-text {
@@ -3082,13 +3093,38 @@ body:has(.viewer-mode-banner) {
 
 .meeting-item-notes {
     background: #F7FAFC;
-    padding: 1rem;
+    padding: 0.875rem 1rem;
     border-radius: 8px;
     border-left: 4px solid #FFE600;
-    font-size: 0.95rem;
-    line-height: 1.6;
+    font-size: 0.9rem;
+    line-height: 1.5;
     color: #4A5568;
     margin-top: 0.5rem;
+    max-height: 100px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: pre-wrap;
+    scrollbar-width: thin;
+    scrollbar-color: #CBD5E0 #F7FAFC;
+}
+
+.meeting-item-notes::-webkit-scrollbar {
+    width: 6px;
+}
+
+.meeting-item-notes::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.meeting-item-notes::-webkit-scrollbar-thumb {
+    background: #CBD5E0;
+    border-radius: 3px;
+}
+
+.meeting-item-notes::-webkit-scrollbar-thumb:hover {
+    background: #A0AEC0;
 }
 
 /* Meeting View Navigation */
@@ -3175,7 +3211,7 @@ body:has(.viewer-mode-banner) {
 /* Responsive Design */
 @media (max-width: 1400px) {
     .meeting-view-content {
-        grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(min(400px, 100%), 1fr));
         padding: 2rem 2rem;
     }
 }
