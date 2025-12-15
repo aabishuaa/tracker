@@ -42,6 +42,11 @@ import {
     exportReportToExcel,
     exportReportToImage
 } from '../utils/reportGenerator.js';
+import {
+    initMeetingView,
+    initMeetingViewGlobal,
+    openMeetingView
+} from '../components/meetingView.js';
 
 // ============================================
 // INITIALIZATION
@@ -75,6 +80,7 @@ function initializeApp() {
     initCalendarGlobal();
     initSnapshotsGlobal();
     initReportGeneratorGlobal();
+    initMeetingViewGlobal();
 
     // Update current date
     updateCurrentDate();
@@ -87,6 +93,9 @@ function initializeApp() {
 
     // Attach event listeners
     attachEventListeners();
+
+    // Initialize meeting view
+    initMeetingView();
 
     // Initialize viewer mode if applicable
     initializeViewerMode();
@@ -124,11 +133,11 @@ function attachEventListeners() {
 
     // Header actions
     document.getElementById('saveSnapshotBtn').addEventListener('click', saveSnapshot);
-    document.getElementById('exportExcelBtn').addEventListener('click', exportToExcel);
     document.getElementById('viewSnapshotBtn').addEventListener('click', () => {
         renderSnapshotVisualization();
         switchTab('snapshot-view');
     });
+    document.getElementById('meetingViewBtn').addEventListener('click', openMeetingView);
     document.getElementById('generateReportBtn').addEventListener('click', generateReport);
     document.getElementById('previewReportBtn').addEventListener('click', previewReport);
     document.getElementById('exportReportExcelBtn').addEventListener('click', exportReportToExcel);

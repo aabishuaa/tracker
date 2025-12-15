@@ -70,13 +70,13 @@
                     <i class="fas fa-camera"></i>
                     Save Snapshot
                 </button>
-                <button class="btn btn-secondary" id="exportExcelBtn">
-                    <i class="fas fa-file-excel"></i>
-                    Export to Excel
-                </button>
                 <button class="btn btn-secondary" id="viewSnapshotBtn">
                     <i class="fas fa-chart-bar"></i>
                     View Snapshot
+                </button>
+                <button class="btn btn-primary" id="meetingViewBtn">
+                    <i class="fas fa-presentation-screen"></i>
+                    Meeting View
                 </button>
                 <button class="btn btn-primary" id="previewReportBtn">
                     <i class="fas fa-eye"></i>
@@ -88,7 +88,7 @@
                 </button>
                 <button class="btn btn-success" id="exportReportExcelBtn" title="Export report to Excel">
                     <i class="fas fa-file-excel"></i>
-                    Export Report (Excel)
+                    Export Excel Report
                 </button>
                 <button class="btn btn-success" id="exportReportImageBtn" title="Export report as image">
                     <i class="fas fa-image"></i>
@@ -435,6 +435,70 @@
         <div class="status-menu-item done" onclick="window.actionItems.updateItemStatus('Done')">
             <i class="fas fa-check-circle"></i>
             Done
+        </div>
+    </div>
+
+    <!-- Meeting Presentation View -->
+    <div class="meeting-view-overlay" id="meetingViewOverlay">
+        <div class="meeting-view-container">
+            <!-- Meeting View Header -->
+            <div class="meeting-view-header">
+                <div class="meeting-view-header-left">
+                    <div class="meeting-view-logo">
+                        <div class="meeting-view-accent"></div>
+                        <h1><span class="ey-accent">EY</span> AI Taskforce</h1>
+                    </div>
+                    <div class="meeting-view-date" id="meetingViewDate"></div>
+                </div>
+                <button class="meeting-view-close-btn" id="closeMeetingView">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Meeting View Controls -->
+            <div class="meeting-view-controls">
+                <div class="meeting-view-stats" id="meetingViewStats">
+                    <!-- Stats will be populated by JS -->
+                </div>
+                <div class="meeting-view-filters">
+                    <button class="meeting-filter-btn active" data-filter="all">
+                        <i class="fas fa-list"></i>
+                        All Items
+                    </button>
+                    <button class="meeting-filter-btn" data-filter="overdue">
+                        <i class="fas fa-exclamation-circle"></i>
+                        Overdue
+                    </button>
+                    <button class="meeting-filter-btn" data-filter="in-progress">
+                        <i class="fas fa-spinner"></i>
+                        In Progress
+                    </button>
+                    <button class="meeting-filter-btn" data-filter="blocked">
+                        <i class="fas fa-ban"></i>
+                        Blocked
+                    </button>
+                </div>
+            </div>
+
+            <!-- Meeting View Content -->
+            <div class="meeting-view-content" id="meetingViewContent">
+                <!-- Action items will be populated by JS -->
+            </div>
+
+            <!-- Meeting View Navigation -->
+            <div class="meeting-view-nav" id="meetingViewNav">
+                <button class="meeting-nav-btn" id="meetingPrevBtn">
+                    <i class="fas fa-chevron-left"></i>
+                    Previous
+                </button>
+                <div class="meeting-page-indicator" id="meetingPageIndicator">
+                    <span id="meetingCurrentPage">1</span> / <span id="meetingTotalPages">1</span>
+                </div>
+                <button class="meeting-nav-btn" id="meetingNextBtn">
+                    Next
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
         </div>
     </div>
 
