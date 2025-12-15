@@ -1,49 +1,22 @@
 {
   "routes": [
     {
-      "route": "/.auth/*",
+      "route": "/api/*",
       "allowedRoles": ["anonymous"]
     },
     {
-      "route": "/login",
-      "rewrite": "/.auth/login/aad"
-    },
-    {
-      "route": "/logout",
-      "rewrite": "/.auth/logout"
-    },
-    {
-      "route": "/api/*",
-      "allowedRoles": ["authenticated"]
-    },
-    {
       "route": "/*",
-      "allowedRoles": ["authenticated"]
+      "allowedRoles": ["anonymous"]
     }
   ],
   "navigationFallback": {
     "rewrite": "/index.html",
-    "exclude": ["/images/*.{png,jpg,gif,ico}", "/css/*", "/js/*"]
+    "exclude": ["/images/*.{png,jpg,gif,ico}", "/css/*", "/js/*", "/api/*"]
   },
   "responseOverrides": {
-    "401": {
-      "statusCode": 302,
-      "redirect": "/.auth/login/aad?post_login_redirect_uri=.referrer"
-    },
     "404": {
       "rewrite": "/index.html",
       "statusCode": 200
-    }
-  },
-  "auth": {
-    "identityProviders": {
-      "azureActiveDirectory": {
-        "registration": {
-          "openIdIssuer": "https://login.microsoftonline.com/common",
-          "clientIdSettingName": "AZURE_AD_CLIENT_ID",
-          "clientSecretSettingName": "AZURE_AD_CLIENT_SECRET"
-        }
-      }
     }
   },
   "mimeTypes": {
