@@ -38,7 +38,9 @@ import {
 import {
     initReportGeneratorGlobal,
     generateReport,
-    previewReport
+    previewReport,
+    exportReportToExcel,
+    exportReportToImage
 } from '../utils/reportGenerator.js';
 
 // ============================================
@@ -129,6 +131,8 @@ function attachEventListeners() {
     });
     document.getElementById('generateReportBtn').addEventListener('click', generateReport);
     document.getElementById('previewReportBtn').addEventListener('click', previewReport);
+    document.getElementById('exportReportExcelBtn').addEventListener('click', exportReportToExcel);
+    document.getElementById('exportReportImageBtn').addEventListener('click', exportReportToImage);
 
     // Action items
     document.getElementById('addItemBtn').addEventListener('click', openAddItemModal);

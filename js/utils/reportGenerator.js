@@ -622,13 +622,221 @@ export function previewReport() {
     }
 }
 
+/**
+ * Export report to Excel
+ */
+export function exportReportToExcel() {
+    try {
+        const stats = calculateStatistics();
+
+        // Create workbook
+        const wb = XLSX.utils.book_new();
+
+        // Summary sheet data
+        const summaryData = [
+            ['EY AI Taskforce Report'],
+            ['Generated:', new Date().toLocaleString('en-US', {
+                weekday: 'long',
+                month: 'long',
+                day: 'numeric',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            })],
+            [],
+            ['Statistics Summary'],
+            ['Metric', 'Value'],
+            ['Total Items', stats.total],
+            ['Completed', stats.completed],
+            ['In Progress', stats.inProgress],
+            ['Not Started', stats.notStarted],
+            ['Blocked', stats.blocked],
+            ['Overdue', stats.overdue],
+            ['Completion Rate', `${stats.completionRate}%`]
+        ];
+
+        const summarySheet = XLSX.utils.aoa_to_sheet(summaryData);
+
+        // Style summary sheet
+        summarySheet['!cols'] = [{ wch: 25 }, { wch: 40 }];
+
+        // Add summary sheet
+        XLSX.utils.book_append_sheet(wb, summarySheet, 'Summary');
+
+        // Action items sheet data
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const sortedItems = [...state.actionItems].sort((a, b) => {
+            const dateA = new Date(a.date);
+            const dateB = new Date(b.date);
+            dateA.setHours(0, 0, 0, 0);
+            dateB.setHours(0, 0, 0, 0);
+
+            const isOverdueA = dateA < today && a.status !== 'Done';
+            const isOverdueB = dateB < today && b.status !== 'Done';
+
+            if (isOverdueA && !isOverdueB) return -1;
+            if (!isOverdueA && isOverdueB) return 1;
+
+            return dateA - dateB;
+        });
+
+        const itemsData = [
+            ['Task Name / Description', 'Owner', 'Taskforce', 'Due Date', 'Status', 'Notes', 'Overdue']
+        ];
+
+        sortedItems.forEach(item => {
+            const itemDate = new Date(item.date);
+            itemDate.setHours(0, 0, 0, 0);
+            const isOverdue = itemDate < today && item.status !== 'Done';
+            const notes = item.notes ? stripHtml(item.notes) : 'No notes';
+
+            itemsData.push([
+                item.description,
+                item.owner,
+                item.taskforce || '',
+                formatDate(item.date),
+                item.status,
+                notes,
+                isOverdue ? 'YES' : 'NO'
+            ]);
+        });
+
+        const itemsSheet = XLSX.utils.aoa_to_sheet(itemsData);
+
+        // Set column widths
+        itemsSheet['!cols'] = [
+            { wch: 45 },  // Task Name
+            { wch: 20 },  // Owner
+            { wch: 30 },  // Taskforce
+            { wch: 15 },  // Date
+            { wch: 15 },  // Status
+            { wch: 50 },  // Notes
+            { wch: 10 }   // Overdue
+        ];
+
+        // Style header row
+        const range = XLSX.utils.decode_range(itemsSheet['!ref']);
+        for (let col = range.s.c; col <= range.e.c; col++) {
+            const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
+            if (!itemsSheet[cellAddress]) continue;
+
+            itemsSheet[cellAddress].s = {
+                fill: { fgColor: { rgb: 'FFE600' } },
+                font: { bold: true, name: 'Aptos', sz: 12, color: { rgb: '000000' } },
+                alignment: { horizontal: 'center', vertical: 'center', wrapText: true },
+                border: {
+                    top: { style: 'thin', color: { rgb: '000000' } },
+                    bottom: { style: 'thin', color: { rgb: '000000' } },
+                    left: { style: 'thin', color: { rgb: '000000' } },
+                    right: { style: 'thin', color: { rgb: '000000' } }
+                }
+            };
+        }
+
+        // Add items sheet
+        XLSX.utils.book_append_sheet(wb, itemsSheet, 'Action Items');
+
+        // Add metadata
+        wb.Props = {
+            Title: 'EY AI Taskforce Report',
+            Subject: 'Action Items & Initiative Tracker Report',
+            Author: 'EY AI Taskforce',
+            CreatedDate: new Date()
+        };
+
+        // Generate filename
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+        const filename = `EY_AI_Taskforce_Report_${timestamp}.xlsx`;
+
+        // Download
+        XLSX.writeFile(wb, filename);
+
+        showToast('Report exported to Excel successfully!', 'success');
+    } catch (error) {
+        console.error('Error exporting report to Excel:', error);
+        showToast('Failed to export report to Excel', 'error');
+    }
+}
+
+/**
+ * Export report to image (PNG)
+ */
+export function exportReportToImage() {
+    try {
+        showToast('Generating image... Please wait', 'info');
+
+        const stats = calculateStatistics();
+        const html = generateReportHTML(stats);
+
+        // Create a temporary container
+        const tempContainer = document.createElement('div');
+        tempContainer.style.position = 'absolute';
+        tempContainer.style.left = '-9999px';
+        tempContainer.style.top = '0';
+        tempContainer.style.width = '1200px';
+        tempContainer.innerHTML = html;
+        document.body.appendChild(tempContainer);
+
+        // Wait for fonts and styles to load
+        setTimeout(() => {
+            const reportContainer = tempContainer.querySelector('.report-container');
+
+            if (!reportContainer) {
+                throw new Error('Report container not found');
+            }
+
+            // Use html2canvas to convert to image
+            html2canvas(reportContainer, {
+                scale: 2,
+                useCORS: true,
+                logging: false,
+                backgroundColor: '#ffffff'
+            }).then(canvas => {
+                // Convert canvas to blob
+                canvas.toBlob(blob => {
+                    // Create download link
+                    const url = URL.createObjectURL(blob);
+                    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+                    const filename = `EY_AI_Taskforce_Report_${timestamp}.png`;
+
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+
+                    // Clean up
+                    document.body.removeChild(tempContainer);
+
+                    showToast('Report exported as image successfully!', 'success');
+                }, 'image/png');
+            }).catch(error => {
+                console.error('Error capturing report:', error);
+                document.body.removeChild(tempContainer);
+                showToast('Failed to export report as image', 'error');
+            });
+        }, 1000);
+    } catch (error) {
+        console.error('Error exporting report to image:', error);
+        showToast('Failed to export report to image', 'error');
+    }
+}
+
 // Export globally for onclick handlers
 window.reportGenerator = {
     generateReport,
-    previewReport
+    previewReport,
+    exportReportToExcel,
+    exportReportToImage
 };
 
 export function initReportGeneratorGlobal() {
     window.generateReport = generateReport;
     window.previewReport = previewReport;
+    window.exportReportToExcel = exportReportToExcel;
+    window.exportReportToImage = exportReportToImage;
 }
