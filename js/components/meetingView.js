@@ -102,7 +102,14 @@ function openCardModal(itemId) {
         </div>
 
         <div class="meeting-modal-body">
-            <h2 class="meeting-modal-title">${escapeHtml(item.description)}</h2>
+            <div class="meeting-modal-detail">
+                <div class="meeting-modal-detail-label">
+                    <i class="fas fa-tasks"></i> Action
+                </div>
+                <div class="meeting-modal-detail-value">
+                    <h2 class="meeting-modal-title">${escapeHtml(item.description)}</h2>
+                </div>
+            </div>
 
             <div class="meeting-modal-details">
                 <div class="meeting-modal-detail">
