@@ -2180,3 +2180,267 @@ body:has(.viewer-mode-banner) .header {
 body:has(.viewer-mode-banner) {
     padding-top: 49px;
 }
+
+/* ============================================
+   AUTHENTICATION SCREENS (MSAL.js)
+   ============================================ */
+
+/* Auth Screen Container */
+.auth-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, #FFE600 0%, #FFD700 50%, #FFE600 100%);
+    background-size: 200% 200%;
+    animation: gradientShift 3s ease infinite;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9997;
+    padding: 2rem;
+}
+
+.auth-screen-content {
+    max-width: 500px;
+    width: 100%;
+    background: #FFFFFF;
+    border-radius: 16px;
+    padding: 3rem 2.5rem;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    animation: authScreenSlideIn 0.6s ease;
+}
+
+@keyframes authScreenSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-30px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Auth Logo */
+.auth-logo {
+    margin-bottom: 2rem;
+}
+
+.auth-logo .ey-logo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.auth-logo .ey-letter {
+    font-size: 4rem;
+    font-weight: 900;
+    color: #000000;
+    letter-spacing: -0.05em;
+}
+
+.auth-logo .ey-yellow-bar {
+    width: 120px;
+    height: 6px;
+    background-color: #000000;
+    margin: 0 auto;
+    border-radius: 3px;
+}
+
+/* Auth Title and Subtitle */
+.auth-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #000000;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.02em;
+}
+
+.auth-subtitle {
+    font-size: 1rem;
+    color: #718096;
+    margin-bottom: 2rem;
+    font-weight: 500;
+}
+
+/* Auth Message */
+.auth-message {
+    background-color: #F7FAFC;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border: 2px solid #E2E8F0;
+}
+
+.auth-message i {
+    font-size: 2rem;
+    color: #FFE600;
+    margin-bottom: 0.75rem;
+    display: block;
+}
+
+.auth-message p {
+    font-size: 0.95rem;
+    color: #4A5568;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* Sign-in Button */
+.btn-sign-in {
+    font-size: 1rem;
+    padding: 0.875rem 2rem;
+    min-width: 250px;
+    box-shadow: 0 4px 12px rgba(255, 230, 0, 0.4);
+}
+
+.btn-sign-in:hover {
+    box-shadow: 0 6px 16px rgba(255, 230, 0, 0.5);
+}
+
+/* Access Denied Screen */
+.auth-denied-icon {
+    font-size: 4rem;
+    color: #E53E3E;
+    margin-bottom: 1.5rem;
+}
+
+.auth-denied-info {
+    background-color: #FFF5F5;
+    border: 2px solid #FED7D7;
+    border-radius: 8px;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.auth-denied-info p {
+    margin: 0.5rem 0;
+    font-size: 0.95rem;
+    color: #2D3748;
+}
+
+.auth-denied-info strong {
+    color: #000000;
+}
+
+.auth-denied-reason {
+    color: #C53030 !important;
+    font-weight: 600;
+    margin-top: 1rem !important;
+}
+
+.auth-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 2rem;
+}
+
+.auth-actions .btn {
+    min-width: 150px;
+}
+
+/* Header Auth Container */
+.auth-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-left: auto;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background-color: #F7FAFC;
+    padding: 0.625rem 1rem;
+    border-radius: 8px;
+    border: 2px solid #E2E8F0;
+}
+
+.user-info i {
+    font-size: 1.25rem;
+    color: #FFE600;
+}
+
+.user-email {
+    font-size: 0.9rem;
+    color: #2D3748;
+    font-weight: 600;
+}
+
+.user-info-denied {
+    background-color: #FFF5F5;
+    border-color: #FED7D7;
+}
+
+.user-info-denied i {
+    color: #E53E3E;
+}
+
+.access-denied-badge {
+    background-color: #E53E3E;
+    color: #FFFFFF;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.btn-sign-out-header {
+    min-width: 100px;
+}
+
+/* Responsive Auth Screens */
+@media (max-width: 768px) {
+    .auth-screen {
+        padding: 1rem;
+    }
+
+    .auth-screen-content {
+        padding: 2rem 1.5rem;
+    }
+
+    .auth-logo .ey-letter {
+        font-size: 3rem;
+    }
+
+    .auth-title {
+        font-size: 1.5rem;
+    }
+
+    .auth-subtitle {
+        font-size: 0.9rem;
+    }
+
+    .btn-sign-in {
+        min-width: 100%;
+        padding: 1rem;
+    }
+
+    .auth-actions {
+        flex-direction: column;
+    }
+
+    .auth-actions .btn {
+        width: 100%;
+    }
+
+    .auth-container {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .user-info {
+        font-size: 0.85rem;
+        padding: 0.5rem 0.75rem;
+    }
+}

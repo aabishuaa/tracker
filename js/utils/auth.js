@@ -1,149 +1,464 @@
 /**
- * Authentication utilities for Azure AD integration
+ * MSAL.js Authentication for Microsoft Entra ID (Azure AD)
+ *
+ * This module handles client-side authentication using MSAL.js
+ * and server-side authorization using Azure Functions
  */
 
-// Allowlist of authorized email addresses
-// Add or remove emails as needed
-const AUTHORIZED_EMAILS = [
-    // Add authorized email addresses here
-    // Example: 'john.doe@ey.com',
-    // Example: 'jane.smith@ey.com',
-];
-
-// Set to true to allow any email from specific domains
-const ALLOW_DOMAIN_MODE = false;
-const ALLOWED_DOMAINS = [
-    // Example: 'ey.com',
-    // Example: 'company.com',
-];
-
-/**
- * Get current user information from Azure Static Web Apps
- */
-async function getUserInfo() {
-    try {
-        const response = await fetch('/.auth/me');
-        const payload = await response.json();
-        const { clientPrincipal } = payload;
-        return clientPrincipal;
-    } catch (error) {
-        console.error('Error fetching user info:', error);
-        return null;
-    }
-}
-
-/**
- * Check if user email is authorized
- */
-function isEmailAuthorized(email) {
-    if (!email) return false;
-
-    // If no restrictions are set, allow all authenticated users
-    if (AUTHORIZED_EMAILS.length === 0 && !ALLOW_DOMAIN_MODE) {
-        return true;
-    }
-
-    // Check specific email allowlist
-    if (AUTHORIZED_EMAILS.length > 0 && AUTHORIZED_EMAILS.includes(email.toLowerCase())) {
-        return true;
-    }
-
-    // Check domain allowlist
-    if (ALLOW_DOMAIN_MODE && ALLOWED_DOMAINS.length > 0) {
-        const emailDomain = email.split('@')[1]?.toLowerCase();
-        if (emailDomain && ALLOWED_DOMAINS.includes(emailDomain)) {
-            return true;
+// MSAL Configuration
+// These values will be set from environment or hardcoded for your tenant
+const msalConfig = {
+    auth: {
+        clientId: window.ENV?.AZURE_CLIENT_ID || 'YOUR_CLIENT_ID_HERE', // Replace with your App Registration Client ID
+        authority: window.ENV?.AZURE_AUTHORITY || 'https://login.microsoftonline.com/YOUR_TENANT_ID_HERE', // Replace with your Tenant ID
+        redirectUri: window.location.origin,
+        postLogoutRedirectUri: window.location.origin,
+        navigateToLoginRequestUrl: true
+    },
+    cache: {
+        cacheLocation: 'localStorage', // sessionStorage or localStorage
+        storeAuthStateInCookie: false
+    },
+    system: {
+        loggerOptions: {
+            loggerCallback: (level, message, containsPii) => {
+                if (containsPii) return;
+                switch (level) {
+                    case msal.LogLevel.Error:
+                        console.error(message);
+                        return;
+                    case msal.LogLevel.Warning:
+                        console.warn(message);
+                        return;
+                    default:
+                        return;
+                }
+            }
         }
     }
+};
 
-    return false;
+// Request configuration for login
+const loginRequest = {
+    scopes: ['openid', 'profile', 'email', 'User.Read']
+};
+
+// Global MSAL instance
+let msalInstance = null;
+let currentAccount = null;
+
+/**
+ * Initialize MSAL instance
+ */
+function initializeMsal() {
+    try {
+        msalInstance = new msal.PublicClientApplication(msalConfig);
+        return msalInstance.initialize();
+    } catch (error) {
+        console.error('Error initializing MSAL:', error);
+        throw error;
+    }
 }
 
 /**
- * Initialize authentication UI
+ * Handle redirect response after login
  */
-async function initAuth() {
-    const userInfo = await getUserInfo();
+async function handleRedirectResponse() {
+    try {
+        const response = await msalInstance.handleRedirectPromise();
+        if (response) {
+            currentAccount = response.account;
+            return response;
+        } else {
+            // Check if there's already an account signed in
+            const accounts = msalInstance.getAllAccounts();
+            if (accounts.length > 0) {
+                currentAccount = accounts[0];
+                msalInstance.setActiveAccount(currentAccount);
+            }
+        }
+        return null;
+    } catch (error) {
+        console.error('Error handling redirect:', error);
+        throw error;
+    }
+}
 
-    // Create auth container in header
+/**
+ * Sign in using popup
+ */
+async function signInPopup() {
+    try {
+        const response = await msalInstance.loginPopup(loginRequest);
+        currentAccount = response.account;
+        msalInstance.setActiveAccount(currentAccount);
+        return response;
+    } catch (error) {
+        console.error('Login popup error:', error);
+        throw error;
+    }
+}
+
+/**
+ * Sign in using redirect
+ */
+async function signInRedirect() {
+    try {
+        await msalInstance.loginRedirect(loginRequest);
+    } catch (error) {
+        console.error('Login redirect error:', error);
+        throw error;
+    }
+}
+
+/**
+ * Sign out
+ */
+async function signOut() {
+    const account = msalInstance.getActiveAccount();
+    if (account) {
+        await msalInstance.logoutRedirect({
+            account: account,
+            postLogoutRedirectUri: window.location.origin
+        });
+    }
+}
+
+/**
+ * Get current account
+ */
+function getCurrentAccount() {
+    if (currentAccount) {
+        return currentAccount;
+    }
+
+    const accounts = msalInstance.getAllAccounts();
+    if (accounts.length > 0) {
+        currentAccount = accounts[0];
+        msalInstance.setActiveAccount(currentAccount);
+        return currentAccount;
+    }
+
+    return null;
+}
+
+/**
+ * Get user email from account
+ */
+function getUserEmail(account) {
+    return account?.username || account?.idTokenClaims?.preferred_username || account?.idTokenClaims?.email || null;
+}
+
+/**
+ * Get user display name from account
+ */
+function getUserDisplayName(account) {
+    return account?.name || account?.idTokenClaims?.name || getUserEmail(account) || 'User';
+}
+
+/**
+ * Check authorization with backend API
+ */
+async function checkAuthorization() {
+    try {
+        const account = getCurrentAccount();
+        if (!account) {
+            return { allowed: false, reason: 'Not authenticated' };
+        }
+
+        const email = getUserEmail(account);
+        const name = getUserDisplayName(account);
+
+        // Call the Azure Function API to check authorization
+        const response = await fetch('/api/authorize', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                email: email,
+                name: name,
+                tenantId: account.tenantId
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`Authorization check failed: ${response.status}`);
+        }
+
+        const result = await response.json();
+        return result;
+    } catch (error) {
+        console.error('Authorization check error:', error);
+        return {
+            allowed: false,
+            reason: 'Unable to verify access. Please try again later.',
+            error: error.message
+        };
+    }
+}
+
+/**
+ * Show signed-out screen
+ */
+function showSignedOutScreen() {
+    const appContainer = document.querySelector('.main-content');
     const header = document.querySelector('.header');
+    const tabBar = document.querySelector('.tab-bar');
+
+    if (appContainer) appContainer.style.display = 'none';
+    if (tabBar) tabBar.style.display = 'none';
+
+    // Show sign-in screen
+    let signInScreen = document.getElementById('signInScreen');
+    if (!signInScreen) {
+        signInScreen = document.createElement('div');
+        signInScreen.id = 'signInScreen';
+        signInScreen.className = 'auth-screen';
+        document.body.appendChild(signInScreen);
+    }
+
+    signInScreen.innerHTML = `
+        <div class="auth-screen-content">
+            <div class="auth-logo">
+                <div class="ey-logo">
+                    <div class="ey-letter">E</div>
+                    <div class="ey-letter">Y</div>
+                </div>
+                <div class="ey-yellow-bar"></div>
+            </div>
+            <h1 class="auth-title">AI Taskforce Tracker</h1>
+            <p class="auth-subtitle">Action Items & Initiative Management</p>
+            <div class="auth-message">
+                <i class="fas fa-lock"></i>
+                <p>Sign in with your Microsoft account to access the application</p>
+            </div>
+            <button class="btn btn-primary btn-sign-in" id="signInBtn">
+                <i class="fab fa-microsoft"></i>
+                Sign in with Microsoft
+            </button>
+        </div>
+    `;
+
+    signInScreen.style.display = 'flex';
+
+    // Add event listener for sign-in button
+    document.getElementById('signInBtn').addEventListener('click', async () => {
+        try {
+            await signInRedirect(); // Using redirect for better compatibility
+        } catch (error) {
+            alert('Sign-in failed. Please try again.');
+            console.error('Sign-in error:', error);
+        }
+    });
+
+    // Update header for signed-out state
+    updateHeaderAuth(null, false);
+}
+
+/**
+ * Show access denied screen
+ */
+function showAccessDeniedScreen(email, reason) {
+    const appContainer = document.querySelector('.main-content');
+    const tabBar = document.querySelector('.tab-bar');
+
+    if (appContainer) appContainer.style.display = 'none';
+    if (tabBar) tabBar.style.display = 'none';
+
+    // Show access denied screen
+    let deniedScreen = document.getElementById('accessDeniedScreen');
+    if (!deniedScreen) {
+        deniedScreen = document.createElement('div');
+        deniedScreen.id = 'accessDeniedScreen';
+        deniedScreen.className = 'auth-screen';
+        document.body.appendChild(deniedScreen);
+    }
+
+    deniedScreen.innerHTML = `
+        <div class="auth-screen-content">
+            <div class="auth-denied-icon">
+                <i class="fas fa-user-lock"></i>
+            </div>
+            <h1 class="auth-title">Access Not Granted</h1>
+            <div class="auth-denied-info">
+                <p><strong>Account:</strong> ${email}</p>
+                ${reason ? `<p class="auth-denied-reason">${reason}</p>` : ''}
+            </div>
+            <div class="auth-message">
+                <i class="fas fa-info-circle"></i>
+                <p>Your account is not authorized to access this application. Please contact your administrator to request access.</p>
+            </div>
+            <div class="auth-actions">
+                <button class="btn btn-secondary" id="signOutBtn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Sign Out
+                </button>
+                <button class="btn btn-primary" id="requestAccessBtn">
+                    <i class="fas fa-envelope"></i>
+                    Request Access
+                </button>
+            </div>
+        </div>
+    `;
+
+    deniedScreen.style.display = 'flex';
+
+    // Add event listeners
+    document.getElementById('signOutBtn').addEventListener('click', () => signOut());
+    document.getElementById('requestAccessBtn').addEventListener('click', () => {
+        // You can customize this to send an email or open a form
+        alert('Please contact your administrator to request access.\n\nYour email: ' + email);
+    });
+
+    // Update header for denied state
+    updateHeaderAuth(email, false);
+}
+
+/**
+ * Show main application
+ */
+function showMainApplication() {
+    const appContainer = document.querySelector('.main-content');
+    const tabBar = document.querySelector('.tab-bar');
+
+    if (appContainer) appContainer.style.display = 'block';
+    if (tabBar) tabBar.style.display = 'block';
+
+    // Hide auth screens
+    const signInScreen = document.getElementById('signInScreen');
+    const deniedScreen = document.getElementById('accessDeniedScreen');
+
+    if (signInScreen) signInScreen.style.display = 'none';
+    if (deniedScreen) deniedScreen.style.display = 'none';
+}
+
+/**
+ * Update header authentication UI
+ */
+function updateHeaderAuth(email, isAuthorized) {
+    const headerContent = document.querySelector('.header-content');
+    if (!headerContent) return;
+
+    // Remove existing auth container
+    const existingAuthContainer = headerContent.querySelector('.auth-container');
+    if (existingAuthContainer) {
+        existingAuthContainer.remove();
+    }
+
+    // Create new auth container
     const authContainer = document.createElement('div');
     authContainer.className = 'auth-container';
-    authContainer.style.cssText = 'margin-left: auto; display: flex; align-items: center; gap: 15px;';
 
-    if (userInfo) {
-        const email = userInfo.userDetails;
-        const authorized = isEmailAuthorized(email);
-
-        if (!authorized) {
-            // User is authenticated but not authorized
-            authContainer.innerHTML = `
-                <div class="unauthorized-notice" style="background: #ff4444; color: white; padding: 8px 15px; border-radius: 6px; font-size: 14px;">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    Access Denied: ${email}
-                </div>
-                <a href="/logout" class="btn-logout" style="background: #333; color: white; padding: 8px 15px; border-radius: 6px; text-decoration: none; font-size: 14px;">
-                    <i class="fas fa-sign-out-alt"></i> Logout
-                </a>
-            `;
-
-            // Hide main content and show unauthorized message
-            const mainContent = document.querySelector('.container');
-            if (mainContent) {
-                mainContent.style.display = 'none';
-            }
-
-            // Show full-screen unauthorized message
-            const unauthorizedDiv = document.createElement('div');
-            unauthorizedDiv.className = 'unauthorized-page';
-            unauthorizedDiv.style.cssText = 'display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 80vh; text-align: center; padding: 40px;';
-            unauthorizedDiv.innerHTML = `
-                <div style="max-width: 600px;">
-                    <i class="fas fa-lock" style="font-size: 80px; color: #ff4444; margin-bottom: 30px;"></i>
-                    <h1 style="font-size: 32px; margin-bottom: 20px; color: #333;">Access Denied</h1>
-                    <p style="font-size: 18px; color: #666; margin-bottom: 30px;">
-                        Your account <strong>${email}</strong> is not authorized to access this application.
-                    </p>
-                    <p style="font-size: 16px; color: #888; margin-bottom: 30px;">
-                        Please contact your administrator to request access.
-                    </p>
-                    <a href="/logout" class="btn" style="display: inline-block; background: #333; color: white; padding: 12px 30px; border-radius: 6px; text-decoration: none; font-size: 16px;">
-                        <i class="fas fa-sign-out-alt"></i> Logout and try another account
-                    </a>
-                </div>
-            `;
-            document.body.appendChild(unauthorizedDiv);
-        } else {
-            // User is authenticated and authorized
-            authContainer.innerHTML = `
-                <div class="user-info" style="display: flex; align-items: center; gap: 10px; padding: 8px 15px; background: #f5f5f5; border-radius: 6px;">
-                    <i class="fas fa-user-circle" style="font-size: 20px; color: #FFE600;"></i>
-                    <span style="font-size: 14px; color: #333;">${email}</span>
-                </div>
-                <a href="/logout" class="btn-logout" style="background: #333; color: white; padding: 8px 15px; border-radius: 6px; text-decoration: none; font-size: 14px;">
-                    <i class="fas fa-sign-out-alt"></i> Logout
-                </a>
-            `;
-        }
-    } else {
-        // User is not authenticated - this shouldn't happen due to route protection
-        // but showing login button just in case
+    if (email && isAuthorized) {
+        // User is signed in and authorized
         authContainer.innerHTML = `
-            <a href="/login" class="btn-login" style="background: #FFE600; color: #2B2B2B; padding: 8px 15px; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: 600;">
-                <i class="fas fa-sign-in-alt"></i> Login with Microsoft
-            </a>
+            <div class="user-info">
+                <i class="fas fa-user-circle"></i>
+                <span class="user-email">${email}</span>
+            </div>
+            <button class="btn btn-secondary btn-sm btn-sign-out-header" id="headerSignOutBtn">
+                <i class="fas fa-sign-out-alt"></i>
+                Sign Out
+            </button>
         `;
+
+        setTimeout(() => {
+            const signOutBtn = document.getElementById('headerSignOutBtn');
+            if (signOutBtn) {
+                signOutBtn.addEventListener('click', () => signOut());
+            }
+        }, 0);
+    } else if (email && !isAuthorized) {
+        // User is signed in but not authorized
+        authContainer.innerHTML = `
+            <div class="user-info user-info-denied">
+                <i class="fas fa-user-slash"></i>
+                <span class="user-email">${email}</span>
+                <span class="access-denied-badge">Access Denied</span>
+            </div>
+        `;
+    } else {
+        // User is not signed in
+        authContainer.innerHTML = `
+            <button class="btn btn-primary btn-sm" id="headerSignInBtn">
+                <i class="fab fa-microsoft"></i>
+                Sign in with Microsoft
+            </button>
+        `;
+
+        setTimeout(() => {
+            const signInBtn = document.getElementById('headerSignInBtn');
+            if (signInBtn) {
+                signInBtn.addEventListener('click', () => signInRedirect());
+            }
+        }, 0);
     }
 
-    header.appendChild(authContainer);
+    headerContent.appendChild(authContainer);
+}
+
+/**
+ * Initialize authentication and check access
+ */
+async function initAuth() {
+    try {
+        // Initialize MSAL
+        await initializeMsal();
+
+        // Handle redirect response (if coming back from login)
+        await handleRedirectResponse();
+
+        // Get current account
+        const account = getCurrentAccount();
+
+        if (!account) {
+            // User is not signed in
+            showSignedOutScreen();
+            return;
+        }
+
+        // User is signed in, check authorization
+        const email = getUserEmail(account);
+        const authResult = await checkAuthorization();
+
+        if (authResult.allowed) {
+            // User is authorized
+            showMainApplication();
+            updateHeaderAuth(email, true);
+        } else {
+            // User is not authorized
+            showAccessDeniedScreen(email, authResult.reason);
+        }
+    } catch (error) {
+        console.error('Auth initialization error:', error);
+        // Show error message
+        alert('Authentication error. Please refresh the page and try again.');
+        showSignedOutScreen();
+    }
 }
 
 // Initialize authentication when DOM is ready
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initAuth);
 } else {
-    initAuth();
+    // DOM is already ready, check if MSAL library is loaded
+    if (typeof msal !== 'undefined') {
+        initAuth();
+    } else {
+        // Wait for MSAL library to load
+        window.addEventListener('load', initAuth);
+    }
 }
 
-// Export for use in other modules
-export { getUserInfo, isEmailAuthorized, AUTHORIZED_EMAILS, ALLOW_DOMAIN_MODE, ALLOWED_DOMAINS };
+// Export functions for use in other modules if needed
+export {
+    initAuth,
+    signInPopup,
+    signInRedirect,
+    signOut,
+    getCurrentAccount,
+    getUserEmail,
+    getUserDisplayName,
+    checkAuthorization
+};

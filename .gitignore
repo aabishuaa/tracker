@@ -22,3 +22,12 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Azure Functions
+api/local.settings.json
+api/.vscode/
+
+# Environment files
+.env
+.env.local
+config.js

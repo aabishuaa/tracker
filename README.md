@@ -9,10 +9,11 @@ Enterprise project management tracker built with **vanilla HTML, CSS, and JavaSc
 ## ✨ New Features
 
 - 🎬 **EY Branded Opening Animation** - Eye-catching yellow animation with "AI Taskforce" branding
-- 🔒 **Azure AD Authentication** - Secure access with enterprise email login (see [AUTHENTICATION_GUIDE.md](AUTHENTICATION_GUIDE.md))
+- 🔒 **Microsoft Entra ID Authentication (MSAL.js)** - Enterprise-grade auth with tenant restriction and allowlist (see [ENTRA_ID_SETUP.md](ENTRA_ID_SETUP.md))
 - 👁️ **Viewer Mode** - Read-only access for team members (add `?mode=view` to URL)
 - ☁️ **Azure Deployment Ready** - Optimized for Azure Static Web Apps (Free tier)
 - 🔄 **Auto-Deploy with GitHub Actions** - Automatic deployment on git push
+- 🛡️ **Server-Side Authorization** - Azure Function validates user access via allowlist
 
 ## Features
 
@@ -68,24 +69,27 @@ php -S localhost:8080
 
 ## 🔒 Authentication & Security
 
-### Azure AD Authentication (Optional but Recommended)
+### Microsoft Entra ID Authentication (MSAL.js) - **Recommended**
 
-Protect your deployment with enterprise-grade authentication:
+Protect your deployment with enterprise-grade authentication using MSAL.js:
 
-**👉 See [AUTHENTICATION_GUIDE.md](AUTHENTICATION_GUIDE.md) for complete setup**
+**👉 See [ENTRA_ID_SETUP.md](ENTRA_ID_SETUP.md) for complete setup**
 
 **What you get:**
-- ✅ Secure login with Microsoft/work email
-- ✅ Restrict access to specific users or domains
-- ✅ Free tier compatible (no additional costs)
-- ✅ Professional authentication UI
-- ✅ Login/logout functionality
+- ✅ Secure "Sign in with Microsoft" button
+- ✅ Tenant-specific authentication (only @ey.com users)
+- ✅ Server-side authorization with allowlist
+- ✅ No secrets exposed to client
+- ✅ Professional sign-in/access-denied screens
+- ✅ Azure Function for access control
 
 **Quick setup:**
-1. Create Azure AD App Registration
-2. Add secrets to your Static Web App
-3. Configure allowed users in `js/utils/auth.js`
+1. Create Entra ID App Registration (tenant-specific)
+2. Configure Client ID and Tenant ID in `js/utils/auth.js`
+3. Set allowlist in Azure Static Web App configuration
 4. Deploy!
+
+**Legacy Option:** The previous Azure Static Web Apps built-in auth is documented in [AUTHENTICATION_GUIDE.md](AUTHENTICATION_GUIDE.md) (not recommended for new deployments).
 
 Without authentication, anyone with your URL can access the app.
 
@@ -120,13 +124,20 @@ They can view all data but cannot make changes.
 tracker/
 ├── index.html                          # Main HTML structure
 ├── styles.css                          # All styling including animations
-├── staticwebapp.config.json           # Azure configuration (includes auth)
+├── staticwebapp.config.json           # Azure Static Web Apps configuration
 ├── README.md                          # This file
+├── ENTRA_ID_SETUP.md                  # Entra ID (MSAL.js) auth setup guide
 ├── AZURE_DEPLOYMENT_GUIDE.md          # Deployment guide
-├── AUTHENTICATION_GUIDE.md            # Authentication setup guide
+├── AUTHENTICATION_GUIDE.md            # Legacy auth guide (SWA built-in)
 ├── .github/
 │   └── workflows/
 │       └── azure-static-web-apps.yml  # Auto-deployment workflow
+├── api/                               # Azure Functions API
+│   ├── host.json                      # Functions runtime config
+│   ├── package.json                   # API dependencies
+│   └── authorize/
+│       ├── function.json              # Function binding config
+│       └── index.js                   # Authorization logic
 └── js/
     ├── core/
     │   ├── app.js                     # Main application logic
@@ -142,7 +153,7 @@ tracker/
     │   ├── tabs.js                    # Tab navigation
     │   └── toast.js                   # Toast notifications
     └── utils/
-        ├── auth.js                    # Azure AD authentication & authorization
+        ├── auth.js                    # MSAL.js authentication
         ├── editors.js                 # Rich text editor setup
         ├── helpers.js                 # Helper functions
         └── viewerMode.js              # Viewer mode functionality
