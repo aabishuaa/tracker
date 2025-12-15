@@ -192,10 +192,16 @@
                 <div class="events-container">
                     <div class="events-header">
                         <h3 class="events-title">Upcoming Events</h3>
-                        <button class="btn btn-primary btn-sm" id="addEventBtn">
-                            <i class="fas fa-plus"></i>
-                            Add Event
-                        </button>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button class="btn btn-secondary btn-sm" id="exportCalendarBtn" title="Export calendar events to Excel">
+                                <i class="fas fa-file-excel"></i>
+                                Export
+                            </button>
+                            <button class="btn btn-primary btn-sm" id="addEventBtn">
+                                <i class="fas fa-plus"></i>
+                                Add Event
+                            </button>
+                        </div>
                     </div>
                     <div class="events-list" id="eventsList">
                         <!-- Events will be rendered here -->
@@ -367,6 +373,33 @@
                     Edit
                 </button>
                 <button class="btn btn-danger" id="deleteItemDetailsBtn">
+                    <i class="fas fa-trash-alt"></i>
+                    Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Event Details Modal -->
+    <div class="modal-overlay" id="eventDetailsModal">
+        <div class="modal-content modal-content-large">
+            <div class="modal-header">
+                <h2 class="modal-title">Event Details</h2>
+                <button class="modal-close" id="closeEventDetailsModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="eventDetailsContent">
+                    <!-- Event details will be rendered here -->
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" id="editEventDetailsBtn">
+                    <i class="fas fa-edit"></i>
+                    Edit
+                </button>
+                <button class="btn btn-danger" id="deleteEventDetailsBtn">
                     <i class="fas fa-trash-alt"></i>
                     Delete
                 </button>

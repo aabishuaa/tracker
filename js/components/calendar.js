@@ -142,6 +142,7 @@ export function renderEvents() {
             const event = item.data;
             const eventCard = document.createElement('div');
             eventCard.className = 'event-card';
+            eventCard.style.cursor = 'pointer';
 
             const iconClass = getEventIconClass(event.category);
             const posterHtml = event.poster ? `<img src="${event.poster}" alt="${escapeHtml(event.title)}" class="event-card-poster">` : '';
@@ -161,7 +162,7 @@ export function renderEvents() {
                     <div class="event-description">${event.description}</div>
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <span class="event-category">${event.category}</span>
-                        <div class="event-actions">
+                        <div class="event-actions" onclick="event.stopPropagation()">
                             <button class="btn btn-secondary btn-sm" onclick="window.calendar.editEvent('${event.id}')" title="Edit">
                                 <i class="fas fa-edit"></i>
                             </button>
@@ -172,6 +173,9 @@ export function renderEvents() {
                     </div>
                 </div>
             `;
+
+            // Add click handler to view details
+            eventCard.addEventListener('click', () => viewEventDetails(event.id));
 
             eventsList.appendChild(eventCard);
         }
@@ -376,6 +380,268 @@ export function deleteEvent(id) {
 }
 
 // ============================================
+// CALENDAR EVENTS EXCEL EXPORT
+// ============================================
+
+export function exportCalendarToExcel() {
+    if (state.calendarEvents.length === 0) {
+        showToast('No calendar events to export', 'error');
+        return;
+    }
+
+    // Create summary statistics
+    const totalEvents = state.calendarEvents.length;
+    const eventsByCategory = {};
+
+    state.calendarEvents.forEach(event => {
+        eventsByCategory[event.category] = (eventsByCategory[event.category] || 0) + 1;
+    });
+
+    // Sort events by date
+    const sortedEvents = [...state.calendarEvents].sort((a, b) =>
+        new Date(a.date) - new Date(b.date)
+    );
+
+    // Create workbook
+    const wb = XLSX.utils.book_new();
+
+    // ===== DASHBOARD SHEET =====
+    const dashboardData = [
+        ['EY AI Taskforce - Calendar Events Dashboard'],
+        ['Generated:', new Date().toLocaleString()],
+        [],
+        ['SUMMARY STATISTICS'],
+        ['Total Events', totalEvents],
+        [],
+        ['EVENTS BY CATEGORY'],
+        ...Object.entries(eventsByCategory).map(([category, count]) => [category, count]),
+        [],
+        ['UPCOMING EVENTS (Next 7 Days)'],
+    ];
+
+    // Add upcoming events
+    const today = new Date();
+    const weekFromNow = new Date(today);
+    weekFromNow.setDate(weekFromNow.getDate() + 7);
+
+    const upcomingEvents = sortedEvents.filter(event => {
+        const eventDate = new Date(event.date);
+        return eventDate >= today && eventDate <= weekFromNow;
+    });
+
+    dashboardData.push(['Event', 'Date', 'Category']);
+    upcomingEvents.forEach(event => {
+        dashboardData.push([event.title, formatDateLong(event.date), event.category]);
+    });
+
+    const dashboardWS = XLSX.utils.aoa_to_sheet(dashboardData);
+
+    // Style dashboard title
+    dashboardWS['A1'].s = {
+        font: { bold: true, sz: 16, color: { rgb: '000000' } },
+        fill: { fgColor: { rgb: 'FFE600' } },
+        alignment: { horizontal: 'left', vertical: 'center' }
+    };
+
+    // Set column widths for dashboard
+    dashboardWS['!cols'] = [
+        { wch: 40 },
+        { wch: 25 },
+        { wch: 20 }
+    ];
+
+    // Merge title cell
+    dashboardWS['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 2 } }];
+
+    XLSX.utils.book_append_sheet(wb, dashboardWS, 'Dashboard');
+
+    // ===== ALL EVENTS SHEET =====
+    const eventsHeaders = ['Title', 'Date', 'Category', 'Description'];
+    const eventsData = [eventsHeaders];
+
+    sortedEvents.forEach(event => {
+        // Strip HTML from description
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = event.description || '';
+        const plainDescription = tempDiv.textContent || tempDiv.innerText || '';
+
+        eventsData.push([
+            event.title,
+            formatDateLong(event.date),
+            event.category,
+            plainDescription
+        ]);
+    });
+
+    const eventsWS = XLSX.utils.aoa_to_sheet(eventsData);
+
+    // Set column widths
+    eventsWS['!cols'] = [
+        { wch: 40 },  // Title
+        { wch: 20 },  // Date
+        { wch: 15 },  // Category
+        { wch: 60 }   // Description
+    ];
+
+    // Style header row
+    const range = XLSX.utils.decode_range(eventsWS['!ref']);
+    for (let col = range.s.c; col <= range.e.c; col++) {
+        const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
+        if (!eventsWS[cellAddress]) continue;
+
+        eventsWS[cellAddress].s = {
+            fill: { fgColor: { rgb: 'FFE600' } },
+            font: { bold: true, name: 'Aptos', sz: 12, color: { rgb: '000000' } },
+            alignment: { horizontal: 'center', vertical: 'center', wrapText: true },
+            border: {
+                top: { style: 'thin', color: { rgb: '000000' } },
+                bottom: { style: 'thin', color: { rgb: '000000' } },
+                left: { style: 'thin', color: { rgb: '000000' } },
+                right: { style: 'thin', color: { rgb: '000000' } }
+            }
+        };
+    }
+
+    // Style data rows
+    for (let row = range.s.r + 1; row <= range.e.r; row++) {
+        for (let col = range.s.c; col <= range.e.c; col++) {
+            const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
+            if (!eventsWS[cellAddress]) continue;
+
+            eventsWS[cellAddress].s = {
+                font: { name: 'Aptos', sz: 11 },
+                alignment: { vertical: 'top', wrapText: true },
+                border: {
+                    top: { style: 'thin', color: { rgb: 'E2E8F0' } },
+                    bottom: { style: 'thin', color: { rgb: 'E2E8F0' } },
+                    left: { style: 'thin', color: { rgb: 'E2E8F0' } },
+                    right: { style: 'thin', color: { rgb: 'E2E8F0' } }
+                }
+            };
+        }
+    }
+
+    XLSX.utils.book_append_sheet(wb, eventsWS, 'All Events');
+
+    // ===== BY CATEGORY SHEETS =====
+    Object.keys(eventsByCategory).forEach(category => {
+        const categoryEvents = sortedEvents.filter(e => e.category === category);
+        const categoryData = [eventsHeaders];
+
+        categoryEvents.forEach(event => {
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = event.description || '';
+            const plainDescription = tempDiv.textContent || tempDiv.innerText || '';
+
+            categoryData.push([
+                event.title,
+                formatDateLong(event.date),
+                event.category,
+                plainDescription
+            ]);
+        });
+
+        const categoryWS = XLSX.utils.aoa_to_sheet(categoryData);
+        categoryWS['!cols'] = [
+            { wch: 40 },
+            { wch: 20 },
+            { wch: 15 },
+            { wch: 60 }
+        ];
+
+        // Style header
+        const catRange = XLSX.utils.decode_range(categoryWS['!ref']);
+        for (let col = catRange.s.c; col <= catRange.e.c; col++) {
+            const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
+            if (!categoryWS[cellAddress]) continue;
+
+            categoryWS[cellAddress].s = {
+                fill: { fgColor: { rgb: 'FFE600' } },
+                font: { bold: true, name: 'Aptos', sz: 12, color: { rgb: '000000' } },
+                alignment: { horizontal: 'center', vertical: 'center', wrapText: true }
+            };
+        }
+
+        XLSX.utils.book_append_sheet(wb, categoryWS, category.substring(0, 31));
+    });
+
+    // Add metadata
+    wb.Props = {
+        Title: 'EY AI Taskforce Calendar Events',
+        Subject: 'Calendar Events Dashboard',
+        Author: 'EY AI Taskforce',
+        CreatedDate: new Date()
+    };
+
+    // Generate filename
+    const today = new Date();
+    const filename = `EY-Calendar-Events-${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}.xlsx`;
+
+    // Download
+    XLSX.writeFile(wb, filename);
+
+    showToast('Calendar events exported to Excel successfully');
+}
+
+// ============================================
+// EVENT DETAILS MODAL
+// ============================================
+
+export function viewEventDetails(id) {
+    const event = state.calendarEvents.find(e => e.id === id);
+    if (!event) return;
+
+    const modal = document.getElementById('eventDetailsModal');
+    const content = document.getElementById('eventDetailsContent');
+
+    const iconClass = getEventIconClass(event.category);
+    const posterHtml = event.poster
+        ? `<div class="event-detail-poster">
+             <img src="${event.poster}" alt="${escapeHtml(event.title)}">
+           </div>`
+        : '';
+
+    content.innerHTML = `
+        ${posterHtml}
+        <div class="event-detail-header">
+            <div class="event-detail-icon">
+                <i class="${iconClass}"></i>
+            </div>
+            <div>
+                <h3 class="event-detail-title">${escapeHtml(event.title)}</h3>
+                <p class="event-detail-date">
+                    <i class="fas fa-calendar"></i>
+                    ${formatDateLong(event.date)}
+                </p>
+            </div>
+        </div>
+
+        <div class="event-detail-section">
+            <div class="event-detail-label">
+                <i class="fas fa-tag"></i>
+                Category
+            </div>
+            <span class="event-category">${event.category}</span>
+        </div>
+
+        <div class="event-detail-section">
+            <div class="event-detail-label">
+                <i class="fas fa-align-left"></i>
+                Description
+            </div>
+            <div class="event-detail-description">
+                ${event.description || '<em style="color: #A0AEC0;">No description provided</em>'}
+            </div>
+        </div>
+    `;
+
+    // Store current event ID for edit/delete actions
+    state.currentEventDetailsId = id;
+
+    openModal('eventDetailsModal');
+}
+
+// ============================================
 // EXPORTS FOR WINDOW (onclick handlers)
 // ============================================
 
@@ -387,6 +653,8 @@ export function initCalendarGlobal() {
         editEvent,
         saveEvent,
         deleteEvent,
-        navigateEventsPage
+        navigateEventsPage,
+        exportCalendarToExcel,
+        viewEventDetails
     };
 }

@@ -24,7 +24,10 @@ import {
     navigateMonth,
     goToToday,
     openAddEventModal,
-    saveEvent
+    saveEvent,
+    exportCalendarToExcel,
+    editEvent,
+    deleteEvent
 } from '../components/calendar.js';
 import {
     initSnapshotsGlobal,
@@ -142,6 +145,7 @@ function attachEventListeners() {
     document.getElementById('saveEventBtn').addEventListener('click', saveEvent);
     document.getElementById('cancelEventBtn').addEventListener('click', () => closeModal('eventModal'));
     document.getElementById('closeEventModal').addEventListener('click', () => closeModal('eventModal'));
+    document.getElementById('exportCalendarBtn').addEventListener('click', exportCalendarToExcel);
 
     // Event poster upload
     document.getElementById('eventPoster').addEventListener('change', (e) => {
@@ -181,6 +185,29 @@ function attachEventListeners() {
         closeModal('itemDetailsModal');
         state.selectedItemId = null;
         renderActionItems();
+    });
+
+    // Event details modal
+    document.getElementById('closeEventDetailsModal').addEventListener('click', () => {
+        closeModal('eventDetailsModal');
+        state.currentEventDetailsId = null;
+    });
+
+    document.getElementById('editEventDetailsBtn').addEventListener('click', () => {
+        if (state.currentEventDetailsId) {
+            closeModal('eventDetailsModal');
+            editEvent(state.currentEventDetailsId);
+        }
+    });
+
+    document.getElementById('deleteEventDetailsBtn').addEventListener('click', () => {
+        if (state.currentEventDetailsId) {
+            if (confirm('Are you sure you want to delete this event?')) {
+                deleteEvent(state.currentEventDetailsId);
+                closeModal('eventDetailsModal');
+                state.currentEventDetailsId = null;
+            }
+        }
     });
 
     // Table sorting
