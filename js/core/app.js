@@ -32,6 +32,11 @@ import {
     exportToExcel,
     renderSnapshotVisualization
 } from '../components/snapshots.js';
+import {
+    initReportGeneratorGlobal,
+    generateReport,
+    previewReport
+} from '../utils/reportGenerator.js';
 
 // ============================================
 // INITIALIZATION
@@ -64,6 +69,7 @@ function initializeApp() {
     initActionItemsGlobal();
     initCalendarGlobal();
     initSnapshotsGlobal();
+    initReportGeneratorGlobal();
 
     // Update current date
     updateCurrentDate();
@@ -118,6 +124,8 @@ function attachEventListeners() {
         renderSnapshotVisualization();
         switchTab('snapshot-view');
     });
+    document.getElementById('generateReportBtn').addEventListener('click', generateReport);
+    document.getElementById('previewReportBtn').addEventListener('click', previewReport);
 
     // Action items
     document.getElementById('addItemBtn').addEventListener('click', openAddItemModal);
