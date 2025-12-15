@@ -10,9 +10,8 @@ import { escapeHtml, formatDate, formatDateLong } from '../utils/helpers.js';
 const meetingState = {
     currentFilter: 'all',
     currentPage: 1,
-    itemsPerPage: 10,
-    filteredItems: [],
-    expandedItems: new Set()
+    itemsPerPage: 5,
+    filteredItems: []
 };
 
 /**
@@ -43,8 +42,9 @@ function calculateStats() {
     const inProgress = items.filter(item => item.status === 'In Progress').length;
     const blocked = items.filter(item => item.status === 'Blocked').length;
     const done = items.filter(item => item.status === 'Done').length;
+    const notStarted = items.filter(item => item.status === 'Not Started').length;
 
-    return { total, overdue, inProgress, blocked, done };
+    return { total, overdue, inProgress, blocked, done, notStarted };
 }
 
 /**
@@ -70,6 +70,9 @@ function getFilteredItems() {
             break;
         case 'blocked':
             items = items.filter(item => item.status === 'Blocked');
+            break;
+        case 'not-started':
+            items = items.filter(item => item.status === 'Not Started');
             break;
         case 'all':
         default:
@@ -115,60 +118,52 @@ function renderStats() {
     const statsContainer = document.getElementById('meetingViewStats');
 
     statsContainer.innerHTML = `
-        <div class="meeting-stat-item">
-            <i class="fas fa-list meeting-stat-icon total"></i>
-            <div class="meeting-stat-content">
+        <div class="meeting-stat-card">
+            <div class="meeting-stat-icon-wrapper total">
+                <i class="fas fa-list"></i>
+            </div>
+            <div class="meeting-stat-info">
                 <div class="meeting-stat-value">${stats.total}</div>
-                <div class="meeting-stat-label">Total</div>
+                <div class="meeting-stat-label">Total Items</div>
             </div>
         </div>
-        <div class="meeting-stat-item">
-            <i class="fas fa-exclamation-circle meeting-stat-icon overdue"></i>
-            <div class="meeting-stat-content">
+        <div class="meeting-stat-card">
+            <div class="meeting-stat-icon-wrapper overdue">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="meeting-stat-info">
                 <div class="meeting-stat-value">${stats.overdue}</div>
                 <div class="meeting-stat-label">Overdue</div>
             </div>
         </div>
-        <div class="meeting-stat-item">
-            <i class="fas fa-spinner meeting-stat-icon in-progress"></i>
-            <div class="meeting-stat-content">
+        <div class="meeting-stat-card">
+            <div class="meeting-stat-icon-wrapper in-progress">
+                <i class="fas fa-spinner"></i>
+            </div>
+            <div class="meeting-stat-info">
                 <div class="meeting-stat-value">${stats.inProgress}</div>
                 <div class="meeting-stat-label">In Progress</div>
             </div>
         </div>
-        <div class="meeting-stat-item">
-            <i class="fas fa-ban meeting-stat-icon blocked"></i>
-            <div class="meeting-stat-content">
+        <div class="meeting-stat-card">
+            <div class="meeting-stat-icon-wrapper blocked">
+                <i class="fas fa-ban"></i>
+            </div>
+            <div class="meeting-stat-info">
                 <div class="meeting-stat-value">${stats.blocked}</div>
                 <div class="meeting-stat-label">Blocked</div>
             </div>
         </div>
-        <div class="meeting-stat-item">
-            <i class="fas fa-check-circle meeting-stat-icon done"></i>
-            <div class="meeting-stat-content">
+        <div class="meeting-stat-card">
+            <div class="meeting-stat-icon-wrapper done">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="meeting-stat-info">
                 <div class="meeting-stat-value">${stats.done}</div>
-                <div class="meeting-stat-label">Done</div>
+                <div class="meeting-stat-label">Completed</div>
             </div>
         </div>
     `;
-}
-
-/**
- * Toggle item expansion
- */
-function toggleItemExpansion(itemId) {
-    const itemElement = document.querySelector(`[data-item-id="${itemId}"]`);
-    if (!itemElement) return;
-
-    if (meetingState.expandedItems.has(itemId)) {
-        meetingState.expandedItems.delete(itemId);
-        itemElement.classList.remove('expanded');
-        itemElement.classList.add('collapsed');
-    } else {
-        meetingState.expandedItems.add(itemId);
-        itemElement.classList.remove('collapsed');
-        itemElement.classList.add('expanded');
-    }
 }
 
 /**
@@ -209,14 +204,25 @@ function renderItems() {
             const isOverdue = itemDate < today && item.status !== 'Done';
             const daysUntilDue = Math.ceil((itemDate - today) / (1000 * 60 * 60 * 24));
 
-            let itemClasses = 'meeting-action-item collapsed';
-            if (isOverdue) itemClasses += ' overdue';
-            else if (item.status === 'Blocked') itemClasses += ' blocked';
-            else if (item.status === 'In Progress') itemClasses += ' in-progress';
-            else if (item.status === 'Done') itemClasses += ' done';
+            let itemClass = 'meeting-item-card';
+            let priorityBadge = '';
 
-            if (meetingState.expandedItems.has(item.id)) {
-                itemClasses = itemClasses.replace('collapsed', 'expanded');
+            if (isOverdue) {
+                itemClass += ' overdue';
+                priorityBadge = `<div class="meeting-priority-badge overdue">
+                    <i class="fas fa-exclamation-circle"></i>
+                    ${Math.abs(daysUntilDue)} day${Math.abs(daysUntilDue) !== 1 ? 's' : ''} overdue
+                </div>`;
+            } else if (item.status === 'Blocked') {
+                itemClass += ' blocked';
+                priorityBadge = `<div class="meeting-priority-badge blocked">
+                    <i class="fas fa-ban"></i>
+                    Blocked
+                </div>`;
+            } else if (item.status === 'In Progress') {
+                itemClass += ' in-progress';
+            } else if (item.status === 'Done') {
+                itemClass += ' done';
             }
 
             const notes = item.notes ? stripHtml(item.notes) : '';
@@ -224,74 +230,56 @@ function renderItems() {
             const itemNumber = startIndex + index + 1;
 
             return `
-                <div class="${itemClasses}" data-item-id="${item.id}">
-                    <!-- Collapsed Header -->
-                    <div class="meeting-item-collapsed-header" onclick="window.meetingView.toggleItem('${item.id}')">
-                        <div class="meeting-item-number">${itemNumber}</div>
-                        <div class="meeting-item-collapsed-content">
-                            <div class="meeting-item-collapsed-info">
-                                <div class="meeting-item-collapsed-title">${escapeHtml(item.description)}</div>
-                                <div class="meeting-item-collapsed-meta">
-                                    <div class="meeting-item-collapsed-meta-item">
-                                        <i class="fas fa-user"></i>
-                                        <span>${escapeHtml(item.owner)}</span>
-                                    </div>
-                                    <span class="meeting-item-status ${statusClass}">${item.status}</span>
-                                </div>
+                <div class="${itemClass}">
+                    <div class="meeting-item-header-row">
+                        <div class="meeting-item-number-badge">#${itemNumber}</div>
+                        <div class="meeting-item-status-badge ${statusClass}">
+                            ${item.status === 'Not Started' ? '<i class="fas fa-circle"></i>' : ''}
+                            ${item.status === 'In Progress' ? '<i class="fas fa-spinner"></i>' : ''}
+                            ${item.status === 'Blocked' ? '<i class="fas fa-ban"></i>' : ''}
+                            ${item.status === 'Done' ? '<i class="fas fa-check-circle"></i>' : ''}
+                            ${item.status}
+                        </div>
+                        ${priorityBadge}
+                    </div>
+
+                    <div class="meeting-item-title">${escapeHtml(item.description)}</div>
+
+                    <div class="meeting-item-details-grid">
+                        <div class="meeting-item-detail">
+                            <div class="meeting-item-detail-label">
+                                <i class="fas fa-user"></i> Owner
                             </div>
-                            <i class="fas fa-chevron-down meeting-item-expand-icon"></i>
+                            <div class="meeting-item-detail-value">${escapeHtml(item.owner)}</div>
+                        </div>
+
+                        ${item.taskforce ? `
+                        <div class="meeting-item-detail">
+                            <div class="meeting-item-detail-label">
+                                <i class="fas fa-users"></i> Taskforce
+                            </div>
+                            <div class="meeting-item-detail-value">${escapeHtml(item.taskforce)}</div>
+                        </div>
+                        ` : ''}
+
+                        <div class="meeting-item-detail">
+                            <div class="meeting-item-detail-label">
+                                <i class="fas fa-calendar"></i> Due Date
+                            </div>
+                            <div class="meeting-item-detail-value ${isOverdue ? 'overdue-text' : ''}">
+                                ${formatDateLong(item.date)}
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Expanded Details -->
-                    <div class="meeting-item-expanded-details">
-                        <div class="meeting-item-expanded-content">
-                            <div class="meeting-item-details">
-                                <div class="meeting-item-row">
-                                    <div class="meeting-item-label">
-                                        <i class="fas fa-user"></i>
-                                        Owner
-                                    </div>
-                                    <div class="meeting-item-value">${escapeHtml(item.owner)}</div>
-                                </div>
-                                ${item.taskforce ? `
-                                <div class="meeting-item-row">
-                                    <div class="meeting-item-label">
-                                        <i class="fas fa-users"></i>
-                                        Taskforce
-                                    </div>
-                                    <div class="meeting-item-value">${escapeHtml(item.taskforce)}</div>
-                                </div>
-                                ` : ''}
-                                <div class="meeting-item-row">
-                                    <div class="meeting-item-label">
-                                        <i class="fas fa-calendar"></i>
-                                        Due Date
-                                    </div>
-                                    <div class="meeting-item-value ${isOverdue ? 'overdue-text' : ''}">
-                                        ${formatDateLong(item.date)}
-                                    </div>
-                                </div>
-                                ${isOverdue ? `
-                                <div class="meeting-item-badge">
-                                    <i class="fas fa-exclamation-triangle"></i>
-                                    <span>${Math.abs(daysUntilDue)} day${Math.abs(daysUntilDue) !== 1 ? 's' : ''} overdue</span>
-                                </div>
-                                ` : ''}
-                                ${notes ? `
-                                <div class="meeting-item-row">
-                                    <div class="meeting-item-label">
-                                        <i class="fas fa-sticky-note"></i>
-                                        Notes
-                                    </div>
-                                    <div class="meeting-item-value">
-                                        <div class="meeting-item-notes">${escapeHtml(notes)}</div>
-                                    </div>
-                                </div>
-                                ` : ''}
-                            </div>
+                    ${notes ? `
+                    <div class="meeting-item-notes-section">
+                        <div class="meeting-item-notes-label">
+                            <i class="fas fa-sticky-note"></i> Notes
                         </div>
+                        <div class="meeting-item-notes-content">${escapeHtml(notes)}</div>
                     </div>
+                    ` : ''}
                 </div>
             `;
         }).join('');
@@ -300,6 +288,14 @@ function renderItems() {
     // Update pagination
     document.getElementById('meetingCurrentPage').textContent = totalPages > 0 ? meetingState.currentPage : 0;
     document.getElementById('meetingTotalPages').textContent = totalPages;
+
+    // Update showing info
+    const showingStart = totalPages > 0 ? startIndex + 1 : 0;
+    const showingEnd = Math.min(endIndex, meetingState.filteredItems.length);
+    const showingInfo = document.getElementById('meetingShowingInfo');
+    if (showingInfo) {
+        showingInfo.textContent = `Showing ${showingStart}-${showingEnd} of ${meetingState.filteredItems.length}`;
+    }
 
     // Update navigation buttons
     document.getElementById('meetingPrevBtn').disabled = meetingState.currentPage <= 1;
@@ -374,7 +370,6 @@ export function openMeetingView() {
     // Reset state
     meetingState.currentFilter = 'all';
     meetingState.currentPage = 1;
-    meetingState.expandedItems.clear();
 
     // Reset filter buttons
     document.querySelectorAll('.meeting-filter-btn').forEach(btn => {
@@ -458,7 +453,6 @@ export function initMeetingView() {
 export function initMeetingViewGlobal() {
     window.meetingView = {
         open: openMeetingView,
-        close: closeMeetingView,
-        toggleItem: toggleItemExpansion
+        close: closeMeetingView
     };
 }
