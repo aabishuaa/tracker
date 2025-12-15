@@ -7,6 +7,7 @@ import { state } from '../core/state.js';
 import { escapeHtml, formatDate, formatDateLong } from '../utils/helpers.js';
 import { saveToStorage } from '../services/storage.js';
 import { showToast } from '../ui/toast.js';
+import { renderActionItems, renderDetailsPanel } from './actionItems.js';
 
 // Meeting view state
 const meetingState = {
@@ -168,9 +169,13 @@ function updateMeetingItemStatus(itemId, newStatus) {
         // Refresh the modal to show updated status
         openCardModal(itemId);
 
-        // Refresh stats and items
+        // Refresh meeting view stats and items
         renderStats();
         renderItems();
+
+        // Update main page action items table and details panel
+        renderActionItems();
+        renderDetailsPanel();
 
         showToast(`Status updated to "${newStatus}"`);
     }
