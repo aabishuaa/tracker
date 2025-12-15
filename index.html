@@ -455,11 +455,22 @@
                 </button>
             </div>
 
-            <!-- Meeting View Controls -->
-            <div class="meeting-view-controls">
+            <!-- Meeting Info Section -->
+            <div class="meeting-info-section" id="meetingInfoSection">
+                <div class="meeting-info-card">
+                    <i class="fas fa-calendar-check"></i>
+                    <div class="meeting-info-content">
+                        <h3 class="meeting-info-title">Today's Meeting</h3>
+                        <p class="meeting-info-subtitle" id="meetingInfoSubtitle">Review action items and track progress</p>
+                    </div>
+                </div>
                 <div class="meeting-view-stats" id="meetingViewStats">
                     <!-- Stats will be populated by JS -->
                 </div>
+            </div>
+
+            <!-- Meeting View Controls -->
+            <div class="meeting-view-controls">
                 <div class="meeting-view-filters">
                     <button class="meeting-filter-btn active" data-filter="all">
                         <i class="fas fa-list"></i>

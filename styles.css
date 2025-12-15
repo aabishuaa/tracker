@@ -2817,8 +2817,8 @@ body:has(.viewer-mode-banner) {
     transform: rotate(90deg);
 }
 
-/* Meeting View Controls */
-.meeting-view-controls {
+/* Meeting Info Section */
+.meeting-info-section {
     background: rgba(45, 55, 72, 0.5);
     padding: 1.5rem 3rem;
     display: flex;
@@ -2826,11 +2826,57 @@ body:has(.viewer-mode-banner) {
     align-items: center;
     gap: 2rem;
     flex-wrap: wrap;
+    border-bottom: 1px solid rgba(255, 230, 0, 0.2);
+}
+
+.meeting-info-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: rgba(255, 230, 0, 0.15);
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    border: 2px solid #FFE600;
+}
+
+.meeting-info-card i {
+    font-size: 2.5rem;
+    color: #FFE600;
+}
+
+.meeting-info-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.meeting-info-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: white;
+    margin: 0;
+}
+
+.meeting-info-subtitle {
+    font-size: 0.95rem;
+    color: #CBD5E0;
+    margin: 0;
+}
+
+/* Meeting View Controls */
+.meeting-view-controls {
+    background: rgba(45, 55, 72, 0.5);
+    padding: 1rem 3rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
+    flex-wrap: wrap;
 }
 
 .meeting-view-stats {
     display: flex;
-    gap: 2rem;
+    gap: 1.5rem;
     flex-wrap: wrap;
 }
 
@@ -2922,9 +2968,9 @@ body:has(.viewer-mode-banner) {
     overflow-y: auto;
     overflow-x: hidden;
     padding: 2rem 3rem;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(450px, 100%), 1fr));
-    gap: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
     align-content: start;
     max-width: 100%;
 }
@@ -2932,16 +2978,23 @@ body:has(.viewer-mode-banner) {
 .meeting-action-item {
     background: white;
     border-radius: 12px;
-    padding: 1.75rem;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     border: 2px solid #E2E8F0;
     transition: all 0.3s ease;
     animation: slideIn 0.4s ease;
     overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    max-width: 100%;
-    min-height: 0;
+    cursor: pointer;
+    position: relative;
+}
+
+.meeting-action-item.collapsed {
+    padding: 0;
+}
+
+.meeting-action-item.expanded {
+    padding: 0;
+    border-color: #FFE600;
+    box-shadow: 0 8px 24px rgba(255, 230, 0, 0.3);
 }
 
 @keyframes slideIn {
@@ -2977,6 +3030,99 @@ body:has(.viewer-mode-banner) {
 .meeting-action-item.done {
     border-color: #48BB78;
     opacity: 0.85;
+}
+
+/* Meeting Item Collapsed Header */
+.meeting-item-collapsed-header {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1.5rem 2rem;
+    transition: background-color 0.2s ease;
+}
+
+.meeting-action-item:hover .meeting-item-collapsed-header {
+    background-color: #FFFEF0;
+}
+
+.meeting-item-number {
+    font-size: 3.5rem;
+    font-weight: 900;
+    color: #FFE600;
+    line-height: 1;
+    text-shadow: 0 2px 8px rgba(255, 230, 0, 0.3);
+    min-width: 80px;
+    flex-shrink: 0;
+}
+
+.meeting-item-collapsed-content {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    min-width: 0;
+}
+
+.meeting-item-collapsed-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.meeting-item-collapsed-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #2D3748;
+    line-height: 1.4;
+    margin-bottom: 0.5rem;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.meeting-item-collapsed-meta {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    font-size: 0.9rem;
+    color: #718096;
+    flex-wrap: wrap;
+}
+
+.meeting-item-collapsed-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.meeting-item-collapsed-meta-item i {
+    color: #FFE600;
+}
+
+.meeting-item-expand-icon {
+    font-size: 1.5rem;
+    color: #CBD5E0;
+    transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.meeting-action-item.expanded .meeting-item-expand-icon {
+    transform: rotate(180deg);
+    color: #FFE600;
+}
+
+/* Meeting Item Expanded Details */
+.meeting-item-expanded-details {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease;
+}
+
+.meeting-action-item.expanded .meeting-item-expanded-details {
+    max-height: 1000px;
+}
+
+.meeting-item-expanded-content {
+    padding: 0 2rem 2rem 2rem;
+    border-top: 2px solid #F7FAFC;
 }
 
 .meeting-item-header {
@@ -3209,18 +3355,12 @@ body:has(.viewer-mode-banner) {
 }
 
 /* Responsive Design */
-@media (max-width: 1400px) {
-    .meeting-view-content {
-        grid-template-columns: repeat(auto-fill, minmax(min(400px, 100%), 1fr));
-        padding: 2rem 2rem;
-    }
-}
-
 @media (max-width: 1024px) {
     .meeting-view-header {
         padding: 1rem 1.5rem;
     }
 
+    .meeting-info-section,
     .meeting-view-controls,
     .meeting-view-nav {
         padding: 1rem 1.5rem;
@@ -3228,7 +3368,6 @@ body:has(.viewer-mode-banner) {
 
     .meeting-view-content {
         padding: 1.5rem 1.5rem;
-        grid-template-columns: 1fr;
     }
 
     .meeting-view-logo h1 {
@@ -3242,6 +3381,11 @@ body:has(.viewer-mode-banner) {
     .meeting-stat-item {
         padding: 0.5rem 1rem;
     }
+
+    .meeting-item-number {
+        font-size: 2.5rem;
+        min-width: 60px;
+    }
 }
 
 @media (max-width: 768px) {
@@ -3252,6 +3396,16 @@ body:has(.viewer-mode-banner) {
         padding: 1rem;
     }
 
+    .meeting-info-section {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 1rem;
+    }
+
+    .meeting-info-card {
+        width: 100%;
+    }
+
     .meeting-view-controls {
         flex-direction: column;
         align-items: stretch;
@@ -3260,12 +3414,31 @@ body:has(.viewer-mode-banner) {
 
     .meeting-view-content {
         padding: 1rem;
-        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+
+    .meeting-item-collapsed-header {
+        padding: 1rem;
         gap: 1rem;
     }
 
-    .meeting-action-item {
-        padding: 1.5rem;
+    .meeting-item-number {
+        font-size: 2rem;
+        min-width: 50px;
+    }
+
+    .meeting-item-collapsed-title {
+        font-size: 1rem;
+    }
+
+    .meeting-item-collapsed-meta {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .meeting-item-expanded-content {
+        padding: 0 1rem 1rem 1rem;
     }
 
     .meeting-view-filters {
@@ -3275,6 +3448,8 @@ body:has(.viewer-mode-banner) {
     .meeting-filter-btn {
         flex: 1;
         justify-content: center;
+        padding: 0.625rem 1rem;
+        font-size: 0.85rem;
     }
 
     .meeting-nav-btn {
