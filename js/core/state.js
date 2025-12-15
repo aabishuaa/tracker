@@ -15,6 +15,10 @@ export const state = {
     statusMenuItemId: null,
     currentEventPoster: null,
 
+    // Events Pagination
+    currentEventsPage: 0,
+    eventsPerPage: 5,
+
     // Rich Text Editors
     itemNotesEditor: null,
     eventDescriptionEditor: null,

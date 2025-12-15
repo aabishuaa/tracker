@@ -93,7 +93,7 @@ export function goToToday() {
 }
 
 // ============================================
-// EVENTS RENDERING
+// EVENTS RENDERING WITH PAGINATION
 // ============================================
 
 export function renderEvents() {
@@ -101,52 +101,161 @@ export function renderEvents() {
 
     if (state.calendarEvents.length === 0) {
         eventsList.innerHTML = '<div class="no-events">No upcoming events scheduled</div>';
+        updatePaginationControls(0, 0);
         return;
     }
+
+    // Group and sort events by sections
+    const groupedEvents = groupEventsBySections();
+
+    // Flatten grouped events for pagination
+    const allSectionedEvents = [];
+    Object.entries(groupedEvents).forEach(([section, events]) => {
+        if (events.length > 0) {
+            allSectionedEvents.push({ type: 'section', title: section });
+            events.forEach(event => allSectionedEvents.push({ type: 'event', data: event }));
+        }
+    });
+
+    if (allSectionedEvents.length === 0) {
+        eventsList.innerHTML = '<div class="no-events">No upcoming events scheduled</div>';
+        updatePaginationControls(0, 0);
+        return;
+    }
+
+    // Calculate pagination
+    const totalPages = Math.ceil(allSectionedEvents.length / state.eventsPerPage);
+    const startIndex = state.currentEventsPage * state.eventsPerPage;
+    const endIndex = startIndex + state.eventsPerPage;
+    const pageItems = allSectionedEvents.slice(startIndex, endIndex);
+
+    // Render events
+    eventsList.innerHTML = '';
+
+    pageItems.forEach(item => {
+        if (item.type === 'section') {
+            const sectionHeader = document.createElement('div');
+            sectionHeader.className = 'events-section-header';
+            sectionHeader.innerHTML = `<h4>${item.title}</h4>`;
+            eventsList.appendChild(sectionHeader);
+        } else {
+            const event = item.data;
+            const eventCard = document.createElement('div');
+            eventCard.className = 'event-card';
+
+            const iconClass = getEventIconClass(event.category);
+            const posterHtml = event.poster ? `<img src="${event.poster}" alt="${escapeHtml(event.title)}" class="event-card-poster">` : '';
+
+            eventCard.innerHTML = `
+                ${posterHtml}
+                <div class="event-card-content">
+                    <div class="event-card-header">
+                        <div class="event-icon">
+                            <i class="${iconClass}"></i>
+                        </div>
+                        <div class="event-details">
+                            <div class="event-title">${escapeHtml(event.title)}</div>
+                            <div class="event-date">${formatDateLong(event.date)}</div>
+                        </div>
+                    </div>
+                    <div class="event-description">${event.description}</div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span class="event-category">${event.category}</span>
+                        <div class="event-actions">
+                            <button class="btn btn-secondary btn-sm" onclick="window.calendar.editEvent('${event.id}')" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-danger btn-sm" onclick="window.calendar.deleteEvent('${event.id}')" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            eventsList.appendChild(eventCard);
+        }
+    });
+
+    updatePaginationControls(state.currentEventsPage + 1, totalPages);
+}
+
+function groupEventsBySections() {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const weekFromNow = new Date(today);
+    weekFromNow.setDate(weekFromNow.getDate() + 7);
+
+    const monthFromNow = new Date(today);
+    monthFromNow.setMonth(monthFromNow.getMonth() + 1);
+
+    const sections = {
+        'Today': [],
+        'This Week': [],
+        'This Month': [],
+        'Later': []
+    };
 
     // Sort events by date
     const sortedEvents = [...state.calendarEvents].sort((a, b) =>
         new Date(a.date) - new Date(b.date)
     );
 
-    eventsList.innerHTML = '';
-
     sortedEvents.forEach(event => {
-        const eventCard = document.createElement('div');
-        eventCard.className = 'event-card';
+        const eventDate = new Date(event.date);
 
-        const iconClass = getEventIconClass(event.category);
-        const posterHtml = event.poster ? `<img src="${event.poster}" alt="${escapeHtml(event.title)}" class="event-card-poster">` : '';
-
-        eventCard.innerHTML = `
-            ${posterHtml}
-            <div class="event-card-content">
-                <div class="event-card-header">
-                    <div class="event-icon">
-                        <i class="${iconClass}"></i>
-                    </div>
-                    <div class="event-details">
-                        <div class="event-title">${escapeHtml(event.title)}</div>
-                        <div class="event-date">${formatDateLong(event.date)}</div>
-                    </div>
-                </div>
-                <div class="event-description">${event.description}</div>
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span class="event-category">${event.category}</span>
-                    <div class="event-actions">
-                        <button class="btn btn-secondary btn-sm" onclick="window.calendar.editEvent('${event.id}')" title="Edit">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn btn-danger btn-sm" onclick="window.calendar.deleteEvent('${event.id}')" title="Delete">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        `;
-
-        eventsList.appendChild(eventCard);
+        if (eventDate.toDateString() === today.toDateString()) {
+            sections['Today'].push(event);
+        } else if (eventDate >= tomorrow && eventDate < weekFromNow) {
+            sections['This Week'].push(event);
+        } else if (eventDate >= weekFromNow && eventDate < monthFromNow) {
+            sections['This Month'].push(event);
+        } else {
+            sections['Later'].push(event);
+        }
     });
+
+    return sections;
+}
+
+function updatePaginationControls(currentPage, totalPages) {
+    const prevBtn = document.getElementById('eventsPrevBtn');
+    const nextBtn = document.getElementById('eventsNextBtn');
+    const pageInfo = document.getElementById('eventsPageInfo');
+
+    if (!prevBtn || !nextBtn || !pageInfo) return;
+
+    pageInfo.textContent = totalPages > 0 ? `${currentPage} / ${totalPages}` : '0 / 0';
+
+    prevBtn.disabled = currentPage <= 1;
+    nextBtn.disabled = currentPage >= totalPages;
+}
+
+export function navigateEventsPage(direction) {
+    const groupedEvents = groupEventsBySections();
+    const allSectionedEvents = [];
+
+    Object.entries(groupedEvents).forEach(([section, events]) => {
+        if (events.length > 0) {
+            allSectionedEvents.push({ type: 'section', title: section });
+            events.forEach(event => allSectionedEvents.push({ type: 'event', data: event }));
+        }
+    });
+
+    const totalPages = Math.ceil(allSectionedEvents.length / state.eventsPerPage);
+
+    state.currentEventsPage += direction;
+
+    if (state.currentEventsPage < 0) {
+        state.currentEventsPage = 0;
+    } else if (state.currentEventsPage >= totalPages) {
+        state.currentEventsPage = totalPages - 1;
+    }
+
+    renderEvents();
 }
 
 function getEventIconClass(category) {
@@ -251,6 +360,7 @@ export function saveEvent() {
     }
 
     saveToStorage('ey-calendar-events', state.calendarEvents);
+    state.currentEventsPage = 0; // Reset pagination
     renderCalendar();
     renderEvents();
     closeModal('eventModal');
@@ -259,6 +369,7 @@ export function saveEvent() {
 export function deleteEvent(id) {
     state.calendarEvents = state.calendarEvents.filter(e => e.id !== id);
     saveToStorage('ey-calendar-events', state.calendarEvents);
+    state.currentEventsPage = 0; // Reset pagination
     renderCalendar();
     renderEvents();
     showToast('Event deleted');
@@ -275,6 +386,7 @@ export function initCalendarGlobal() {
         openAddEventModal,
         editEvent,
         saveEvent,
-        deleteEvent
+        deleteEvent,
+        navigateEventsPage
     };
 }

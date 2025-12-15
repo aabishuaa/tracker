@@ -1044,28 +1044,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 1rem;
-    max-height: 70vh;
-    overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: #CBD5E0 #F7FAFC;
-    padding-right: 0.5rem;
-}
-
-.events-list::-webkit-scrollbar {
-    width: 6px;
-}
-
-.events-list::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.events-list::-webkit-scrollbar-thumb {
-    background: #CBD5E0;
-    border-radius: 3px;
-}
-
-.events-list::-webkit-scrollbar-thumb:hover {
-    background: #A0AEC0;
+    min-height: 400px;
 }
 
 .event-card {
@@ -1174,6 +1153,80 @@ body {
     padding: 3rem 1rem;
     color: #A0AEC0;
     font-style: italic;
+}
+
+/* Events Section Headers */
+.events-section-header {
+    margin-top: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.events-section-header:first-child {
+    margin-top: 0;
+}
+
+.events-section-header h4 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #2D3748;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.5rem 0.75rem;
+    background: linear-gradient(135deg, #FFE600 0%, #FFD700 100%);
+    border-radius: 6px;
+    margin: 0;
+    box-shadow: 0 2px 4px rgba(255, 230, 0, 0.2);
+}
+
+/* Events Pagination */
+.events-pagination {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 2px solid #E2E8F0;
+}
+
+.pagination-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: #FFFFFF;
+    border: 2px solid #E2E8F0;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #4A5568;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.pagination-btn:hover:not(:disabled) {
+    background: #FFE600;
+    border-color: #FFE600;
+    color: #000000;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(255, 230, 0, 0.3);
+}
+
+.pagination-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    background: #F7FAFC;
+}
+
+.pagination-info {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #4A5568;
+    padding: 0.5rem 1rem;
+    background: #F7FAFC;
+    border-radius: 6px;
+    border: 2px solid #E2E8F0;
+    min-width: 80px;
+    text-align: center;
 }
 
 /* Snapshot Visualization */
