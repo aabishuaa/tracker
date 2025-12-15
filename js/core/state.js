@@ -14,6 +14,7 @@ export const state = {
     selectedItemId: null,
     statusMenuItemId: null,
     currentEventPoster: null,
+    currentEventDetailsId: null,
 
     // Events Pagination
     currentEventsPage: 0,
