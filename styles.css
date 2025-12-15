@@ -3413,6 +3413,85 @@ body:has(.viewer-mode-banner) {
     transform: rotate(90deg);
 }
 
+.meeting-modal-status-update {
+    padding: 1.5rem 2rem;
+    background: #F7FAFC;
+    border-bottom: 2px solid #E2E8F0;
+}
+
+.meeting-modal-status-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #718096;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.meeting-modal-status-label i {
+    color: #FFE600;
+}
+
+.meeting-modal-status-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.75rem;
+}
+
+.meeting-status-btn {
+    padding: 0.75rem 1rem;
+    background: white;
+    border: 2px solid #E2E8F0;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #4A5568;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.meeting-status-btn:hover {
+    border-color: #CBD5E0;
+    background: #F7FAFC;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.meeting-status-btn.active {
+    border-width: 3px;
+}
+
+.meeting-status-btn.not-started.active {
+    border-color: #718096;
+    background: #F7FAFC;
+    color: #718096;
+}
+
+.meeting-status-btn.in-progress.active {
+    border-color: #3182CE;
+    background: #EBF8FF;
+    color: #3182CE;
+}
+
+.meeting-status-btn.blocked.active {
+    border-color: #E53E3E;
+    background: #FFF5F5;
+    color: #E53E3E;
+}
+
+.meeting-status-btn.done.active {
+    border-color: #38A169;
+    background: #F0FFF4;
+    color: #38A169;
+}
+
 .meeting-modal-body {
     padding: 2rem;
     overflow-y: auto;
@@ -3642,6 +3721,19 @@ body:has(.viewer-mode-banner) {
 
     .meeting-modal-content {
         max-height: 95vh;
+    }
+
+    .meeting-modal-status-update {
+        padding: 1rem 1.25rem;
+    }
+
+    .meeting-modal-status-buttons {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .meeting-status-btn {
+        padding: 0.625rem 0.75rem;
+        font-size: 0.85rem;
     }
 
     .meeting-modal-body {
