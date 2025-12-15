@@ -3012,6 +3012,8 @@ body:has(.viewer-mode-banner) {
     transition: all 0.3s ease;
     animation: slideIn 0.4s ease;
     position: relative;
+    cursor: pointer;
+    overflow: hidden;
 }
 
 @keyframes slideIn {
@@ -3061,6 +3063,21 @@ body:has(.viewer-mode-banner) {
     flex-wrap: wrap;
 }
 
+.meeting-card-expand-icon {
+    margin-left: auto;
+    color: #718096;
+    font-size: 1.25rem;
+    transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.meeting-item-card:hover .meeting-card-expand-icon {
+    color: #2D3748;
+}
+
+.meeting-item-card.expanded .meeting-card-expand-icon {
+    transform: rotate(180deg);
+}
+
 .meeting-item-number-badge {
     background: linear-gradient(135deg, #FFE600 0%, #FFC700 100%);
     color: #1A202C;
@@ -3084,6 +3101,7 @@ body:has(.viewer-mode-banner) {
     text-transform: uppercase;
     letter-spacing: 0.5px;
     white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .meeting-item-status-badge.not-started {
@@ -3114,7 +3132,8 @@ body:has(.viewer-mode-banner) {
     border-radius: 20px;
     font-size: 0.85rem;
     font-weight: 700;
-    margin-left: auto;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .meeting-priority-badge.overdue {
@@ -3132,9 +3151,53 @@ body:has(.viewer-mode-banner) {
     font-weight: 700;
     color: #1A202C;
     line-height: 1.4;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
     word-wrap: break-word;
     overflow-wrap: break-word;
+    hyphens: auto;
+}
+
+/* Meeting Item Summary (Collapsed View) */
+.meeting-item-summary {
+    margin-bottom: 1rem;
+}
+
+.meeting-item-summary-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    align-items: center;
+}
+
+.meeting-item-summary-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+    color: #4A5568;
+    font-weight: 500;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.meeting-item-summary-label i {
+    color: #FFE600;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+/* Meeting Item Expandable Section */
+.meeting-item-expandable {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height 0.4s ease, opacity 0.3s ease, margin-top 0.3s ease;
+}
+
+.meeting-item-expandable.expanded {
+    max-height: 1000px;
+    opacity: 1;
+    margin-top: 1rem;
 }
 
 .meeting-item-details-grid {
@@ -3211,12 +3274,13 @@ body:has(.viewer-mode-banner) {
     font-size: 0.95rem;
     line-height: 1.6;
     color: #4A5568;
-    max-height: 120px;
+    max-height: 200px;
     overflow-y: auto;
     overflow-x: hidden;
     word-wrap: break-word;
     overflow-wrap: break-word;
     white-space: pre-wrap;
+    hyphens: auto;
     scrollbar-width: thin;
     scrollbar-color: #CBD5E0 #F7FAFC;
 }
