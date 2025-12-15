@@ -160,6 +160,18 @@ body {
     box-shadow: 0 4px 8px rgba(229, 62, 62, 0.3);
 }
 
+.btn-success {
+    background-color: #48BB78;
+    color: #FFFFFF;
+    border: 2px solid #48BB78;
+}
+
+.btn-success:hover {
+    background-color: #38A169;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(72, 187, 120, 0.3);
+}
+
 .btn-sm {
     padding: 0.5rem 0.875rem;
     font-size: 0.85rem;

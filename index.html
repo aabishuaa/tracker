@@ -22,6 +22,9 @@
     <!-- SheetJS for Excel export -->
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 
+    <!-- html2canvas for image export -->
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
     <!-- Quill.js for rich text editing -->
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
 
@@ -82,6 +85,14 @@
                 <button class="btn btn-primary" id="generateReportBtn">
                     <i class="fas fa-file-alt"></i>
                     Generate Report
+                </button>
+                <button class="btn btn-success" id="exportReportExcelBtn" title="Export report to Excel">
+                    <i class="fas fa-file-excel"></i>
+                    Export Report (Excel)
+                </button>
+                <button class="btn btn-success" id="exportReportImageBtn" title="Export report as image">
+                    <i class="fas fa-image"></i>
+                    Export Report (Image)
                 </button>
             </div>
         </div>
