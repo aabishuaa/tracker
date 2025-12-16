@@ -69,7 +69,9 @@ function stripHtml(html) {
 function getStatusBadgeClass(status) {
     const statusMap = {
         'Not Started': 'status-not-started',
+        'Discussing': 'status-discussing',
         'In Progress': 'status-in-progress',
+        'Under Review': 'status-under-review',
         'Blocked': 'status-blocked',
         'Done': 'status-done'
     };
@@ -113,7 +115,7 @@ function generateReportHTML(stats) {
         const itemDate = parseDateLocal(item.date);
         itemDate.setHours(0, 0, 0, 0);
         const isOverdue = itemDate < today && item.status !== 'Done';
-        const notes = item.notes ? stripHtml(item.notes) : 'No notes';
+        const notes = item.notes || 'No notes';
 
         return `
             <div class="report-action-item ${isOverdue ? 'overdue' : ''}">

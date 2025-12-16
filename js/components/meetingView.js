@@ -13,7 +13,7 @@ import { renderActionItems, renderDetailsPanel } from './actionItems.js';
 const meetingState = {
     currentFilter: 'all',
     currentPage: 1,
-    itemsPerPage: 5,
+    itemsPerPage: 3,
     filteredItems: []
 };
 
@@ -53,7 +53,7 @@ function openCardModal(itemId) {
         </div>`;
     }
 
-    const notes = item.notes ? stripHtml(item.notes) : '';
+    const notes = item.notes || '';
     const statusClass = item.status.toLowerCase().replace(' ', '-');
 
     const modalContent = `
@@ -61,7 +61,9 @@ function openCardModal(itemId) {
             <div class="meeting-modal-header-content">
                 <div class="meeting-modal-status-badge ${statusClass}">
                     ${item.status === 'Not Started' ? '<i class="fas fa-circle"></i>' : ''}
+                    ${item.status === 'Discussing' ? '<i class="fas fa-comments"></i>' : ''}
                     ${item.status === 'In Progress' ? '<i class="fas fa-spinner"></i>' : ''}
+                    ${item.status === 'Under Review' ? '<i class="fas fa-search"></i>' : ''}
                     ${item.status === 'Blocked' ? '<i class="fas fa-ban"></i>' : ''}
                     ${item.status === 'Done' ? '<i class="fas fa-check-circle"></i>' : ''}
                     ${item.status}
@@ -83,10 +85,20 @@ function openCardModal(itemId) {
                     <i class="fas fa-circle"></i>
                     Not Started
                 </button>
+                <button class="meeting-status-btn discussing ${item.status === 'Discussing' ? 'active' : ''}"
+                        onclick="window.meetingView.updateStatus('${item.id}', 'Discussing')">
+                    <i class="fas fa-comments"></i>
+                    Discussing
+                </button>
                 <button class="meeting-status-btn in-progress ${item.status === 'In Progress' ? 'active' : ''}"
                         onclick="window.meetingView.updateStatus('${item.id}', 'In Progress')">
                     <i class="fas fa-spinner"></i>
                     In Progress
+                </button>
+                <button class="meeting-status-btn under-review ${item.status === 'Under Review' ? 'active' : ''}"
+                        onclick="window.meetingView.updateStatus('${item.id}', 'Under Review')">
+                    <i class="fas fa-search"></i>
+                    Under Review
                 </button>
                 <button class="meeting-status-btn blocked ${item.status === 'Blocked' ? 'active' : ''}"
                         onclick="window.meetingView.updateStatus('${item.id}', 'Blocked')">
@@ -134,7 +146,7 @@ function openCardModal(itemId) {
                 <div class="meeting-modal-notes-label">
                     <i class="fas fa-sticky-note"></i> Notes
                 </div>
-                <div class="meeting-modal-notes-content">${escapeHtml(notes)}</div>
+                <div class="meeting-modal-notes-content rich-text-content">${notes}</div>
             </div>
             ` : ''}
         </div>
@@ -390,7 +402,9 @@ function renderItems() {
                         <div class="meeting-item-number-badge">#${itemNumber}</div>
                         <div class="meeting-item-status-badge ${statusClass}">
                             ${item.status === 'Not Started' ? '<i class="fas fa-circle"></i>' : ''}
+                            ${item.status === 'Discussing' ? '<i class="fas fa-comments"></i>' : ''}
                             ${item.status === 'In Progress' ? '<i class="fas fa-spinner"></i>' : ''}
+                            ${item.status === 'Under Review' ? '<i class="fas fa-search"></i>' : ''}
                             ${item.status === 'Blocked' ? '<i class="fas fa-ban"></i>' : ''}
                             ${item.status === 'Done' ? '<i class="fas fa-check-circle"></i>' : ''}
                             ${item.status}
