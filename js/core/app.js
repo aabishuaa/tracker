@@ -40,7 +40,8 @@ import {
     generateReport,
     previewReport,
     exportReportToExcel,
-    exportReportToImage
+    exportReportToImage,
+    exportReportToPdf
 } from '../utils/reportGenerator.js';
 import {
     initMeetingView,
@@ -142,6 +143,7 @@ function attachEventListeners() {
     document.getElementById('previewReportBtn').addEventListener('click', previewReport);
     document.getElementById('exportReportExcelBtn').addEventListener('click', exportReportToExcel);
     document.getElementById('exportReportImageBtn').addEventListener('click', exportReportToImage);
+    document.getElementById('exportReportPdfBtn').addEventListener('click', exportReportToPdf);
 
     // Action items
     document.getElementById('addItemBtn').addEventListener('click', openAddItemModal);
