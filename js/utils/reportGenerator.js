@@ -397,23 +397,33 @@ function generateReportHTML(stats) {
                 }
 
                 .status-not-started {
-                    background: #EDF2F7;
+                    background: #E2E8F0;
                     color: #4A5568;
                 }
 
                 .status-in-progress {
-                    background: #BEE3F8;
-                    color: #2C5282;
+                    background: #FED7AA;
+                    color: #C05621;
                 }
 
                 .status-blocked {
                     background: #FED7D7;
-                    color: #9B2C2C;
+                    color: #C53030;
                 }
 
                 .status-done {
                     background: #C6F6D5;
                     color: #22543D;
+                }
+
+                .status-discussing {
+                    background: #E9D5FF;
+                    color: #6B21A8;
+                }
+
+                .status-under-review {
+                    background: #DBEAFE;
+                    color: #1E40AF;
                 }
 
                 .report-item-details {
