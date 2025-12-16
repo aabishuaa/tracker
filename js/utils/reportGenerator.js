@@ -267,7 +267,7 @@ function generateReportHTML(stats) {
                     border-radius: 12px;
                     text-align: center;
                     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-                    border-left: 4px solid;
+                    border-top: 4px solid;
                     transition: transform 0.2s, box-shadow 0.2s;
                 }
 
@@ -356,17 +356,17 @@ function generateReportHTML(stats) {
                     border-radius: 12px;
                     padding: 1.5rem;
                     margin-bottom: 1.5rem;
-                    border-left: 4px solid #E2E8F0;
+                    border-top: 4px solid #E2E8F0;
                     transition: all 0.2s;
                 }
 
                 .report-action-item:hover {
-                    border-left-color: #FFE600;
+                    border-top-color: #FFE600;
                     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
                 }
 
                 .report-action-item.overdue {
-                    border-left-color: #F56565;
+                    border-top-color: #F56565;
                     background: #FFF5F5;
                 }
 
@@ -778,8 +778,12 @@ export function generateReport() {
         const blob = new Blob([html], { type: 'text/html' });
         const url = URL.createObjectURL(blob);
 
-        const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
-        const filename = `EY_AI_Taskforce_Report_${timestamp}.html`;
+        const date = new Date();
+        const day = String(date.getDate()).padStart(2, '0');
+        const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+        const month = months[date.getMonth()];
+        const year = date.getFullYear();
+        const filename = `EY AI Taskforce Item Tracker ${day} ${month} ${year}.html`;
 
         const a = document.createElement('a');
         a.href = url;
