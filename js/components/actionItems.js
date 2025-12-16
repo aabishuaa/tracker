@@ -11,6 +11,15 @@ import { renderCalendar, renderEvents } from './calendar.js';
 import { isViewerMode } from '../utils/viewerMode.js';
 
 // ============================================
+// UPCOMING TASKS PAGINATION STATE
+// ============================================
+
+const upcomingTasksState = {
+    currentPage: 1,
+    itemsPerPage: 10
+};
+
+// ============================================
 // RENDERING
 // ============================================
 
@@ -120,13 +129,28 @@ export function closeDetailsPanel() {
 export function renderDetailsPanel() {
     const panel = document.getElementById('detailsPanel');
 
-    // Get upcoming tasks (not done, sorted by due date)
-    const upcomingTasks = state.actionItems
+    // Get all upcoming tasks (not done, sorted by due date)
+    const allUpcomingTasks = state.actionItems
         .filter(item => item.status !== 'Done')
-        .sort((a, b) => parseDateLocal(a.date) - parseDateLocal(b.date))
-        .slice(0, 10); // Show top 10
+        .sort((a, b) => parseDateLocal(a.date) - parseDateLocal(b.date));
 
-    if (upcomingTasks.length === 0) {
+    const totalTasks = allUpcomingTasks.length;
+    const totalPages = Math.ceil(totalTasks / upcomingTasksState.itemsPerPage);
+
+    // Ensure current page is valid
+    if (upcomingTasksState.currentPage > totalPages && totalPages > 0) {
+        upcomingTasksState.currentPage = totalPages;
+    }
+    if (upcomingTasksState.currentPage < 1) {
+        upcomingTasksState.currentPage = 1;
+    }
+
+    // Get tasks for current page
+    const startIndex = (upcomingTasksState.currentPage - 1) * upcomingTasksState.itemsPerPage;
+    const endIndex = startIndex + upcomingTasksState.itemsPerPage;
+    const upcomingTasks = allUpcomingTasks.slice(startIndex, endIndex);
+
+    if (totalTasks === 0) {
         panel.innerHTML = `
             <div class="upcoming-tasks-panel">
                 <div class="upcoming-tasks-header">
@@ -173,16 +197,38 @@ export function renderDetailsPanel() {
         `;
     }).join('');
 
+    const showingStart = totalTasks > 0 ? startIndex + 1 : 0;
+    const showingEnd = Math.min(endIndex, totalTasks);
+
     panel.innerHTML = `
         <div class="upcoming-tasks-panel">
             <div class="upcoming-tasks-header">
                 <i class="fas fa-tasks"></i>
                 <h3>Upcoming Tasks</h3>
-                <span class="upcoming-tasks-count">${upcomingTasks.length}</span>
+                <span class="upcoming-tasks-count">${totalTasks}</span>
             </div>
             <div class="upcoming-tasks-list">
                 ${tasksHtml}
             </div>
+            ${totalPages > 1 ? `
+            <div class="upcoming-tasks-pagination">
+                <button class="pagination-btn ${upcomingTasksState.currentPage <= 1 ? 'disabled' : ''}"
+                        onclick="window.actionItems.navigateUpcomingPage(-1)"
+                        ${upcomingTasksState.currentPage <= 1 ? 'disabled' : ''}>
+                    <i class="fas fa-chevron-left"></i>
+                    Previous
+                </button>
+                <span class="pagination-info">
+                    ${showingStart}-${showingEnd} of ${totalTasks}
+                </span>
+                <button class="pagination-btn ${upcomingTasksState.currentPage >= totalPages ? 'disabled' : ''}"
+                        onclick="window.actionItems.navigateUpcomingPage(1)"
+                        ${upcomingTasksState.currentPage >= totalPages ? 'disabled' : ''}>
+                    Next
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+            ` : ''}
         </div>
     `;
 }
@@ -541,6 +587,15 @@ export function updateSortIcons() {
 }
 
 // ============================================
+// UPCOMING TASKS PAGINATION
+// ============================================
+
+export function navigateUpcomingPage(direction) {
+    upcomingTasksState.currentPage += direction;
+    renderDetailsPanel();
+}
+
+// ============================================
 // EXPORTS FOR WINDOW (onclick handlers)
 // ============================================
 
@@ -555,6 +610,7 @@ export function initActionItemsGlobal() {
         openStatusMenu,
         closeStatusMenu,
         updateItemStatus,
-        sortActionItems
+        sortActionItems,
+        navigateUpcomingPage
     };
 }

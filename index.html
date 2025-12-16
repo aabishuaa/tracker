@@ -266,7 +266,9 @@
                         <label class="form-label" for="itemStatus">Status</label>
                         <select class="form-select" id="itemStatus">
                             <option value="Not Started">Not Started</option>
+                            <option value="Discussing">Discussing</option>
                             <option value="In Progress">In Progress</option>
+                            <option value="Under Review">Under Review</option>
                             <option value="Blocked">Blocked</option>
                             <option value="Done">Done</option>
                         </select>
@@ -427,9 +429,17 @@
             <i class="fas fa-circle"></i>
             Not Started
         </div>
+        <div class="status-menu-item discussing" onclick="window.actionItems.updateItemStatus('Discussing')">
+            <i class="fas fa-comments"></i>
+            Discussing
+        </div>
         <div class="status-menu-item in-progress" onclick="window.actionItems.updateItemStatus('In Progress')">
             <i class="fas fa-spinner"></i>
             In Progress
+        </div>
+        <div class="status-menu-item under-review" onclick="window.actionItems.updateItemStatus('Under Review')">
+            <i class="fas fa-search"></i>
+            Under Review
         </div>
         <div class="status-menu-item blocked" onclick="window.actionItems.updateItemStatus('Blocked')">
             <i class="fas fa-ban"></i>
