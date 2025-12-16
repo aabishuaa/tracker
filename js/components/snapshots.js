@@ -158,13 +158,17 @@ function createSnapshotCharts(statusCounts, totalItems) {
         'Not Started': '#E2E8F0',
         'In Progress': '#FED7AA',
         'Blocked': '#FED7D7',
-        'Done': '#C6F6D5'
+        'Done': '#C6F6D5',
+        'Discussing': '#E9D5FF',
+        'Under Review': '#DBEAFE'
     };
     const statusBorderColors = {
-        'Not Started': '#CBD5E0',
-        'In Progress': '#ED8936',
-        'Blocked': '#E53E3E',
-        'Done': '#48BB78'
+        'Not Started': '#4A5568',
+        'In Progress': '#C05621',
+        'Blocked': '#C53030',
+        'Done': '#22543D',
+        'Discussing': '#6B21A8',
+        'Under Review': '#1E40AF'
     };
 
     const backgroundColors = statusLabels.map(label => statusColors[label]);
