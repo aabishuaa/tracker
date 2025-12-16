@@ -125,8 +125,8 @@ export function renderSnapshotVisualization() {
                                 <div class="snapshot-task-title">${escapeHtml(item.description)}</div>
                                 <div class="snapshot-task-info">
                                     <div class="snapshot-task-info-item">
-                                        <i class="fas fa-user"></i>
-                                        <span>${escapeHtml(item.owner)}</span>
+                                        <i class="fas fa-users"></i>
+                                        <span>${escapeHtml(Array.isArray(item.owners) ? item.owners.join(', ') : '')}</span>
                                     </div>
                                     <div class="snapshot-task-info-item">
                                         <i class="fas fa-calendar"></i>
@@ -261,18 +261,20 @@ function createSnapshotCharts(statusCounts, totalItems) {
 
 export function exportToExcel() {
     // Prepare header with styling
-    const headers = ['Task Name / Description', 'Owner', 'Taskforce', 'Due Date', 'Status', 'Notes'];
+    const headers = ['Task Name / Description', 'Owners', 'Due Date', 'Status', 'Latest Update', 'Next Steps', 'Notes'];
 
     // Prepare data
     const data = [headers];
 
     state.actionItems.forEach(item => {
+        const ownersText = Array.isArray(item.owners) ? item.owners.join(', ') : '';
         data.push([
             item.description,
-            item.owner,
-            item.taskforce,
+            ownersText,
             formatDate(item.date),
             item.status,
+            item.latestUpdate || '',
+            item.nextSteps || '',
             item.notes || ''
         ]);
     });

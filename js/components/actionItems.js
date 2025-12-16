@@ -21,11 +21,13 @@ export function renderActionItems() {
 
     // Filter items with improved fuzzy search
     let filteredItems = state.actionItems.filter(item => {
+        const ownersText = Array.isArray(item.owners) ? item.owners.join(', ') : '';
         const matchesSearch = !searchTerm ||
             fuzzyMatch(item.description, searchTerm) ||
-            fuzzyMatch(item.owner, searchTerm) ||
-            fuzzyMatch(item.taskforce, searchTerm) ||
-            fuzzyMatch(item.notes, searchTerm);
+            fuzzyMatch(ownersText, searchTerm) ||
+            fuzzyMatch(item.notes, searchTerm) ||
+            fuzzyMatch(item.latestUpdate || '', searchTerm) ||
+            fuzzyMatch(item.nextSteps || '', searchTerm);
         const matchesStatus = !statusFilter || item.status === statusFilter;
         return matchesSearch && matchesStatus;
     });
@@ -36,7 +38,7 @@ export function renderActionItems() {
     if (filteredItems.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="6" style="text-align: center; padding: 3rem; color: #A0AEC0; font-style: italic;">
+                <td colspan="5" style="text-align: center; padding: 3rem; color: #A0AEC0; font-style: italic;">
                     No action items found. Click "Add Action Item" to get started.
                 </td>
             </tr>
@@ -54,8 +56,8 @@ export function renderActionItems() {
 
         // Apply highlighting if search is active
         const description = searchTerm ? highlightText(item.description, searchTerm) : escapeHtml(item.description);
-        const owner = searchTerm ? highlightText(item.owner, searchTerm) : escapeHtml(item.owner);
-        const taskforce = searchTerm ? highlightText(item.taskforce, searchTerm) : escapeHtml(item.taskforce);
+        const ownersText = Array.isArray(item.owners) ? item.owners.join(', ') : '';
+        const owners = searchTerm ? highlightText(ownersText, searchTerm) : escapeHtml(ownersText);
 
         // Determine which action buttons to show based on viewer mode
         const viewerMode = isViewerMode();
@@ -79,8 +81,7 @@ export function renderActionItems() {
             <td>
                 <div style="font-weight: 600;" class="text-wrap">${description}</div>
             </td>
-            <td class="text-wrap">${owner}</td>
-            <td class="text-wrap">${taskforce}</td>
+            <td class="text-wrap">${owners}</td>
             <td style="white-space: nowrap;">${formatDate(item.date)}</td>
             <td>
                 <span class="status-pill status-${item.status.toLowerCase().replace(' ', '-')}"
@@ -145,6 +146,7 @@ export function renderDetailsPanel() {
         const daysUntilDue = Math.ceil((new Date(item.date) - new Date()) / (1000 * 60 * 60 * 24));
         const isOverdue = daysUntilDue < 0;
         const isDueSoon = daysUntilDue >= 0 && daysUntilDue <= 3;
+        const ownersText = Array.isArray(item.owners) ? item.owners.join(', ') : '';
 
         return `
             <div class="upcoming-task-card ${isOverdue ? 'overdue' : ''} ${isDueSoon ? 'due-soon' : ''}"
@@ -157,8 +159,8 @@ export function renderDetailsPanel() {
                 <div class="upcoming-task-title">${escapeHtml(item.description)}</div>
                 <div class="upcoming-task-meta">
                     <div class="upcoming-task-meta-item">
-                        <i class="fas fa-user"></i>
-                        <span>${escapeHtml(item.owner)}</span>
+                        <i class="fas fa-users"></i>
+                        <span>${escapeHtml(ownersText)}</span>
                     </div>
                     <div class="upcoming-task-meta-item">
                         <i class="fas fa-calendar"></i>
@@ -201,18 +203,16 @@ export function renderDetailsModal() {
         return;
     }
 
+    const ownersText = Array.isArray(item.owners) ? item.owners.join(', ') : '';
+
     contentDiv.innerHTML = `
         <div class="detail-item">
             <div class="detail-label">Task Name / Description</div>
             <div class="detail-value large">${escapeHtml(item.description)}</div>
         </div>
         <div class="detail-item">
-            <div class="detail-label">Owner</div>
-            <div class="detail-value">${escapeHtml(item.owner)}</div>
-        </div>
-        <div class="detail-item">
-            <div class="detail-label">Taskforce Members</div>
-            <div class="detail-value">${escapeHtml(item.taskforce)}</div>
+            <div class="detail-label">Owners</div>
+            <div class="detail-value">${escapeHtml(ownersText)}</div>
         </div>
         <div class="detail-item">
             <div class="detail-label">Due Date</div>
@@ -225,6 +225,14 @@ export function renderDetailsModal() {
                     ${item.status}
                 </span>
             </div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Latest Update</div>
+            <div class="detail-value">${escapeHtml(item.latestUpdate || '') || '<em style="color: #A0AEC0;">No update provided</em>'}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Next Steps</div>
+            <div class="detail-value">${escapeHtml(item.nextSteps || '') || '<em style="color: #A0AEC0;">No next steps defined</em>'}</div>
         </div>
         <div class="detail-item">
             <div class="detail-label">Notes</div>
@@ -252,13 +260,14 @@ export function renderDetailsModal() {
 // DEADLINE EVENT HELPERS
 // ============================================
 
-function createDeadlineEvent(itemId, description, date, owner) {
+function createDeadlineEvent(itemId, description, date, owners) {
+    const ownersText = Array.isArray(owners) ? owners.join(', ') : '';
     const deadlineEvent = {
         id: `event-deadline-${itemId}`,
         title: `Deadline: ${description}`,
         date: date,
         category: 'Deadline',
-        description: `<p><strong>Owner:</strong> ${escapeHtml(owner)}</p><p>Action item deadline for: ${escapeHtml(description)}</p>`,
+        description: `<p><strong>Owners:</strong> ${escapeHtml(ownersText)}</p><p>Action item deadline for: ${escapeHtml(description)}</p>`,
         poster: null,
         linkedItemId: itemId
     };
@@ -268,15 +277,16 @@ function createDeadlineEvent(itemId, description, date, owner) {
     renderEvents();
 }
 
-function updateDeadlineEvent(itemId, description, date, owner) {
+function updateDeadlineEvent(itemId, description, date, owners) {
     const eventId = `event-deadline-${itemId}`;
     const eventIndex = state.calendarEvents.findIndex(e => e.id === eventId);
     if (eventIndex !== -1) {
+        const ownersText = Array.isArray(owners) ? owners.join(', ') : '';
         state.calendarEvents[eventIndex] = {
             ...state.calendarEvents[eventIndex],
             title: `Deadline: ${description}`,
             date: date,
-            description: `<p><strong>Owner:</strong> ${escapeHtml(owner)}</p><p>Action item deadline for: ${escapeHtml(description)}</p>`
+            description: `<p><strong>Owners:</strong> ${escapeHtml(ownersText)}</p><p>Action item deadline for: ${escapeHtml(description)}</p>`
         };
         saveToStorage('ey-calendar-events', state.calendarEvents);
         renderCalendar();
@@ -304,10 +314,15 @@ export function editItem(id) {
     state.editingItemId = id;
     document.getElementById('itemModalTitle').textContent = 'Edit Action Item';
     document.getElementById('itemDescription').value = item.description;
-    document.getElementById('itemOwner').value = item.owner;
-    document.getElementById('itemTaskforce').value = item.taskforce;
+
+    // Handle owners array
+    const ownersText = Array.isArray(item.owners) ? item.owners.join(', ') : '';
+    document.getElementById('itemOwners').value = ownersText;
+
     document.getElementById('itemDate').value = item.date;
     document.getElementById('itemStatus').value = item.status;
+    document.getElementById('itemLatestUpdate').value = item.latestUpdate || '';
+    document.getElementById('itemNextSteps').value = item.nextSteps || '';
 
     // Set editor content - handle both HTML and plain text
     if (item.notes) {
@@ -325,13 +340,20 @@ export function editItem(id) {
 
 export function saveItem() {
     const description = document.getElementById('itemDescription').value.trim();
-    const owner = document.getElementById('itemOwner').value.trim();
-    const taskforce = document.getElementById('itemTaskforce').value.trim();
+    const ownersInput = document.getElementById('itemOwners').value.trim();
     const date = document.getElementById('itemDate').value;
     const status = document.getElementById('itemStatus').value;
+    const latestUpdate = document.getElementById('itemLatestUpdate').value.trim();
+    const nextSteps = document.getElementById('itemNextSteps').value.trim();
     const notes = state.itemNotesEditor.root.innerHTML.trim();
 
-    if (!description || !owner || !date) {
+    // Parse owners from comma-separated input
+    const owners = ownersInput
+        .split(',')
+        .map(o => o.trim())
+        .filter(o => o.length > 0);
+
+    if (!description || owners.length === 0 || !date) {
         showToast('Please fill in all required fields', 'error');
         return;
     }
@@ -344,17 +366,18 @@ export function saveItem() {
             state.actionItems[index] = {
                 ...state.actionItems[index],
                 description,
-                owner,
-                taskforce,
+                owners,
                 date,
                 status,
+                latestUpdate,
+                nextSteps,
                 notes,
                 lastUpdated: new Date().toISOString()
             };
 
             // Update deadline event if date changed
             if (oldDate !== date) {
-                updateDeadlineEvent(state.editingItemId, description, date, owner);
+                updateDeadlineEvent(state.editingItemId, description, date, owners);
             }
 
             showToast('Action item updated successfully');
@@ -364,17 +387,18 @@ export function saveItem() {
         const newItem = {
             id: `item-${Date.now()}`,
             description,
-            owner,
-            taskforce,
+            owners,
             date,
             status,
+            latestUpdate,
+            nextSteps,
             notes,
             lastUpdated: new Date().toISOString()
         };
         state.actionItems.unshift(newItem);
 
         // Create deadline event
-        createDeadlineEvent(newItem.id, description, date, owner);
+        createDeadlineEvent(newItem.id, description, date, owners);
 
         showToast('Action item added successfully');
     }

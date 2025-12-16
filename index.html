@@ -152,8 +152,7 @@
                             <thead>
                                 <tr>
                                     <th data-sort="description">Task Name <i class="fas fa-sort"></i></th>
-                                    <th data-sort="owner">Owner <i class="fas fa-sort"></i></th>
-                                    <th data-sort="taskforce">Taskforce <i class="fas fa-sort"></i></th>
+                                    <th data-sort="owners">Owners <i class="fas fa-sort"></i></th>
                                     <th data-sort="date">Due Date <i class="fas fa-sort"></i></th>
                                     <th data-sort="status">Status <i class="fas fa-sort"></i></th>
                                     <th>Actions</th>
@@ -256,12 +255,8 @@
                         <input type="text" class="form-input" id="itemDescription" required>
                     </div>
                     <div class="form-group">
-                        <label class="form-label" for="itemOwner">Owner *</label>
-                        <input type="text" class="form-input" id="itemOwner" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="itemTaskforce">Taskforce Members (comma-separated)</label>
-                        <input type="text" class="form-input" id="itemTaskforce" placeholder="John Doe, Jane Smith">
+                        <label class="form-label" for="itemOwners">Owners (comma-separated) *</label>
+                        <input type="text" class="form-input" id="itemOwners" placeholder="John Doe, Jane Smith" required>
                     </div>
                     <div class="form-group">
                         <label class="form-label" for="itemDate">Due Date *</label>
@@ -275,6 +270,14 @@
                             <option value="Blocked">Blocked</option>
                             <option value="Done">Done</option>
                         </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="itemLatestUpdate">Latest Update</label>
+                        <textarea class="form-input" id="itemLatestUpdate" rows="2" placeholder="Brief status update..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="itemNextSteps">Next Steps</label>
+                        <textarea class="form-input" id="itemNextSteps" rows="2" placeholder="What needs to happen next..."></textarea>
                     </div>
                     <div class="form-group">
                         <label class="form-label" for="itemNotes">Notes</label>
