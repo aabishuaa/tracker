@@ -783,7 +783,7 @@ export function generateReport() {
         const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
         const month = months[date.getMonth()];
         const year = date.getFullYear();
-        const filename = `EY AI Taskforce Item Tracker ${day} ${month} ${year}.html`;
+        const filename = `EY AI Taskforce Item Tracker Update - ${day} ${month} ${year}.html`;
 
         const a = document.createElement('a');
         a.href = url;
@@ -949,8 +949,12 @@ export function exportReportToExcel() {
         };
 
         // Generate filename
-        const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
-        const filename = `EY_AI_Taskforce_Report_${timestamp}.xlsx`;
+        const date = new Date();
+        const day = String(date.getDate()).padStart(2, '0');
+        const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+        const month = months[date.getMonth()];
+        const year = date.getFullYear();
+        const filename = `EY AI Taskforce Item Tracker Update - ${day} ${month} ${year}.xlsx`;
 
         // Download
         XLSX.writeFile(wb, filename);
@@ -1000,8 +1004,12 @@ export function exportReportToImage() {
                 canvas.toBlob(blob => {
                     // Create download link
                     const url = URL.createObjectURL(blob);
-                    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
-                    const filename = `EY_AI_Taskforce_Report_${timestamp}.png`;
+                    const date = new Date();
+                    const day = String(date.getDate()).padStart(2, '0');
+                    const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+                    const month = months[date.getMonth()];
+                    const year = date.getFullYear();
+                    const filename = `EY AI Taskforce Item Tracker Update - ${day} ${month} ${year}.png`;
 
                     const a = document.createElement('a');
                     a.href = url;
@@ -1061,7 +1069,7 @@ export function exportReportToPdf() {
             const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
             const month = months[date.getMonth()];
             const year = date.getFullYear();
-            const filename = `EY AI Taskforce Item Tracker ${day} ${month} ${year}.pdf`;
+            const filename = `EY AI Taskforce Item Tracker Update - ${day} ${month} ${year}.pdf`;
 
             // Configure PDF options
             const opt = {
