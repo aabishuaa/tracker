@@ -485,21 +485,163 @@ function generateReportHTML(stats) {
                 }
 
                 @media (max-width: 768px) {
-                    .report-header h1 {
-                        font-size: 2rem;
+                    body {
+                        padding: 1rem;
                     }
 
-                    .report-stats {
-                        grid-template-columns: repeat(2, 1fr);
+                    .report-header {
+                        padding: 2rem 1.5rem;
+                    }
+
+                    .report-header h1 {
+                        font-size: 1.75rem;
+                    }
+
+                    .report-header p {
+                        font-size: 1rem;
                     }
 
                     .report-meta {
                         flex-direction: column;
                         align-items: flex-start;
+                        padding: 1rem;
+                    }
+
+                    .report-stats {
+                        grid-template-columns: repeat(2, 1fr);
+                        gap: 1rem;
+                        padding: 1.5rem 1rem;
+                    }
+
+                    .stat-card {
+                        padding: 1rem;
+                    }
+
+                    .stat-value {
+                        font-size: 2rem;
+                    }
+
+                    .report-content {
+                        padding: 1rem;
+                    }
+
+                    .report-section-title {
+                        font-size: 1.5rem;
+                    }
+
+                    .report-action-item {
+                        padding: 1rem;
                     }
 
                     .report-item-header {
                         flex-direction: column;
+                        align-items: flex-start;
+                    }
+
+                    .report-item-title {
+                        font-size: 1.1rem;
+                        margin-bottom: 0.5rem;
+                    }
+
+                    .report-detail-row {
+                        flex-direction: column;
+                        gap: 0.25rem;
+                    }
+
+                    .report-label {
+                        min-width: auto;
+                        font-size: 0.9rem;
+                    }
+
+                    .report-value {
+                        font-size: 0.95rem;
+                        padding-left: 1.5rem;
+                    }
+
+                    .report-footer {
+                        padding: 1.5rem 1rem;
+                    }
+                }
+
+                @media (max-width: 480px) {
+                    body {
+                        padding: 0.5rem;
+                    }
+
+                    .report-header {
+                        padding: 1.5rem 1rem;
+                    }
+
+                    .report-header h1 {
+                        font-size: 1.5rem;
+                    }
+
+                    .report-header p {
+                        font-size: 0.9rem;
+                    }
+
+                    .report-meta {
+                        padding: 0.75rem;
+                        gap: 0.75rem;
+                    }
+
+                    .report-meta-item {
+                        font-size: 0.85rem;
+                    }
+
+                    .report-stats {
+                        grid-template-columns: 1fr;
+                        gap: 0.75rem;
+                        padding: 1rem 0.5rem;
+                    }
+
+                    .stat-card {
+                        padding: 0.75rem;
+                    }
+
+                    .stat-value {
+                        font-size: 1.75rem;
+                    }
+
+                    .stat-label {
+                        font-size: 0.8rem;
+                    }
+
+                    .report-content {
+                        padding: 0.75rem;
+                    }
+
+                    .report-section-title {
+                        font-size: 1.25rem;
+                        gap: 0.5rem;
+                    }
+
+                    .report-action-item {
+                        padding: 0.75rem;
+                        margin-bottom: 1rem;
+                    }
+
+                    .report-item-title {
+                        font-size: 1rem;
+                    }
+
+                    .report-status-badge {
+                        padding: 0.4rem 0.75rem;
+                        font-size: 0.75rem;
+                    }
+
+                    .report-label {
+                        font-size: 0.85rem;
+                    }
+
+                    .report-value {
+                        font-size: 0.9rem;
+                        padding-left: 1.25rem;
+                    }
+
+                    .report-footer {
+                        padding: 1rem 0.75rem;
+                        font-size: 0.9rem;
                     }
                 }
             </style>
