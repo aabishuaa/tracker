@@ -5,6 +5,7 @@
 
 import { state } from '../core/state.js';
 import { showToast } from '../ui/toast.js';
+import { parseDateLocal } from './helpers.js';
 
 /**
  * Calculate statistics for the report
@@ -22,7 +23,7 @@ function calculateStatistics() {
     today.setHours(0, 0, 0, 0);
     const overdue = items.filter(item => {
         if (item.status === 'Done') return false;
-        const itemDate = new Date(item.date);
+        const itemDate = parseDateLocal(item.date);
         itemDate.setHours(0, 0, 0, 0);
         return itemDate < today;
     }).length;
@@ -45,7 +46,7 @@ function calculateStatistics() {
  * Generate a formatted date string
  */
 function formatDate(dateString) {
-    const date = new Date(dateString);
+    const date = parseDateLocal(dateString);
     return date.toLocaleDateString('en-US', {
         month: 'long',
         day: 'numeric',
@@ -93,8 +94,8 @@ function generateReportHTML(stats) {
     today.setHours(0, 0, 0, 0);
 
     const sortedItems = [...state.actionItems].sort((a, b) => {
-        const dateA = new Date(a.date);
-        const dateB = new Date(b.date);
+        const dateA = parseDateLocal(a.date);
+        const dateB = parseDateLocal(b.date);
         dateA.setHours(0, 0, 0, 0);
         dateB.setHours(0, 0, 0, 0);
 
@@ -109,7 +110,7 @@ function generateReportHTML(stats) {
 
     // Generate action items HTML
     const actionItemsHTML = sortedItems.map(item => {
-        const itemDate = new Date(item.date);
+        const itemDate = parseDateLocal(item.date);
         itemDate.setHours(0, 0, 0, 0);
         const isOverdue = itemDate < today && item.status !== 'Done';
         const notes = item.notes ? stripHtml(item.notes) : 'No notes';
@@ -674,8 +675,8 @@ export function exportReportToExcel() {
         today.setHours(0, 0, 0, 0);
 
         const sortedItems = [...state.actionItems].sort((a, b) => {
-            const dateA = new Date(a.date);
-            const dateB = new Date(b.date);
+            const dateA = parseDateLocal(a.date);
+            const dateB = parseDateLocal(b.date);
             dateA.setHours(0, 0, 0, 0);
             dateB.setHours(0, 0, 0, 0);
 
@@ -693,7 +694,7 @@ export function exportReportToExcel() {
         ];
 
         sortedItems.forEach(item => {
-            const itemDate = new Date(item.date);
+            const itemDate = parseDateLocal(item.date);
             itemDate.setHours(0, 0, 0, 0);
             const isOverdue = itemDate < today && item.status !== 'Done';
             const notes = item.notes ? stripHtml(item.notes) : 'No notes';

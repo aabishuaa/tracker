@@ -4,7 +4,7 @@
 
 import { state } from '../core/state.js';
 import { saveToStorage } from '../services/storage.js';
-import { escapeHtml, formatDateISO, formatDateLong } from '../utils/helpers.js';
+import { escapeHtml, formatDateISO, formatDateLong, parseDateLocal } from '../utils/helpers.js';
 import { openModal, closeModal } from '../ui/modals.js';
 import { showToast } from '../ui/toast.js';
 
@@ -205,11 +205,11 @@ function groupEventsBySections() {
 
     // Sort events by date
     const sortedEvents = [...state.calendarEvents].sort((a, b) =>
-        new Date(a.date) - new Date(b.date)
+        parseDateLocal(a.date) - parseDateLocal(b.date)
     );
 
     sortedEvents.forEach(event => {
-        const eventDate = new Date(event.date);
+        const eventDate = parseDateLocal(event.date);
 
         if (eventDate.toDateString() === today.toDateString()) {
             sections['Today'].push(event);
@@ -399,7 +399,7 @@ export function exportCalendarToExcel() {
 
     // Sort events by date
     const sortedEvents = [...state.calendarEvents].sort((a, b) =>
-        new Date(a.date) - new Date(b.date)
+        parseDateLocal(a.date) - parseDateLocal(b.date)
     );
 
     // Create workbook
@@ -425,7 +425,7 @@ export function exportCalendarToExcel() {
     weekFromNow.setDate(weekFromNow.getDate() + 7);
 
     const upcomingEvents = sortedEvents.filter(event => {
-        const eventDate = new Date(event.date);
+        const eventDate = parseDateLocal(event.date);
         return eventDate >= today && eventDate <= weekFromNow;
     });
 

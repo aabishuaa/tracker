@@ -4,7 +4,7 @@
 
 import { state } from '../core/state.js';
 import { saveToStorage } from '../services/storage.js';
-import { escapeHtml, formatDate, formatDateTime } from '../utils/helpers.js';
+import { escapeHtml, formatDate, formatDateTime, parseDateLocal } from '../utils/helpers.js';
 import { showToast } from '../ui/toast.js';
 import { switchTab } from '../ui/tabs.js';
 
@@ -55,7 +55,7 @@ export function renderSnapshotVisualization() {
 
     const completionRate = totalItems > 0 ? Math.round((statusCounts['Done'] / totalItems) * 100) : 0;
     const overdueCount = state.actionItems.filter(item => {
-        const dueDate = new Date(item.date);
+        const dueDate = parseDateLocal(item.date);
         const today = new Date();
         return item.status !== 'Done' && dueDate < today;
     }).length;
@@ -110,7 +110,7 @@ export function renderSnapshotVisualization() {
                 ${state.actionItems.length === 0 ?
                     '<p style="text-align: center; color: #A0AEC0; padding: 2rem;">No tasks to display</p>' :
                     state.actionItems.map(item => {
-                        const daysUntilDue = Math.ceil((new Date(item.date) - new Date()) / (1000 * 60 * 60 * 24));
+                        const daysUntilDue = Math.ceil((parseDateLocal(item.date) - new Date()) / (1000 * 60 * 60 * 24));
                         const isOverdue = daysUntilDue < 0 && item.status !== 'Done';
                         const isDueSoon = daysUntilDue >= 0 && daysUntilDue <= 3 && item.status !== 'Done';
 

@@ -4,7 +4,7 @@
 // Full-screen presentation mode for action items during meetings
 
 import { state } from '../core/state.js';
-import { escapeHtml, formatDate, formatDateLong } from '../utils/helpers.js';
+import { escapeHtml, formatDate, formatDateLong, parseDateLocal } from '../utils/helpers.js';
 import { saveToStorage } from '../services/storage.js';
 import { showToast } from '../ui/toast.js';
 import { renderActionItems, renderDetailsPanel } from './actionItems.js';
@@ -35,7 +35,7 @@ function openCardModal(itemId) {
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const itemDate = new Date(item.date);
+    const itemDate = parseDateLocal(item.date);
     itemDate.setHours(0, 0, 0, 0);
     const isOverdue = itemDate < today && item.status !== 'Done';
     const daysUntilDue = Math.ceil((itemDate - today) / (1000 * 60 * 60 * 24));
@@ -190,7 +190,7 @@ function calculateStats() {
 
     const overdue = items.filter(item => {
         if (item.status === 'Done') return false;
-        const itemDate = new Date(item.date);
+        const itemDate = parseDateLocal(item.date);
         itemDate.setHours(0, 0, 0, 0);
         return itemDate < today;
     }).length;
@@ -216,7 +216,7 @@ function getFilteredItems() {
         case 'overdue':
             items = items.filter(item => {
                 if (item.status === 'Done') return false;
-                const itemDate = new Date(item.date);
+                const itemDate = parseDateLocal(item.date);
                 itemDate.setHours(0, 0, 0, 0);
                 return itemDate < today;
             });
@@ -234,8 +234,8 @@ function getFilteredItems() {
         default:
             // Sort by status priority: Overdue > Blocked > In Progress > Not Started > Done
             items.sort((a, b) => {
-                const dateA = new Date(a.date);
-                const dateB = new Date(b.date);
+                const dateA = parseDateLocal(a.date);
+                const dateB = parseDateLocal(b.date);
                 dateA.setHours(0, 0, 0, 0);
                 dateB.setHours(0, 0, 0, 0);
 
@@ -355,7 +355,7 @@ function renderItems() {
         `;
     } else {
         contentContainer.innerHTML = pageItems.map((item, index) => {
-            const itemDate = new Date(item.date);
+            const itemDate = parseDateLocal(item.date);
             itemDate.setHours(0, 0, 0, 0);
             const isOverdue = itemDate < today && item.status !== 'Done';
             const daysUntilDue = Math.ceil((itemDate - today) / (1000 * 60 * 60 * 24));
@@ -484,7 +484,7 @@ export function openMeetingView() {
     today.setHours(0, 0, 0, 0);
 
     const todaysEvents = state.calendarEvents.filter(event => {
-        const eventDate = new Date(event.date);
+        const eventDate = parseDateLocal(event.date);
         eventDate.setHours(0, 0, 0, 0);
         return eventDate.getTime() === today.getTime();
     });
