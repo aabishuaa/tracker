@@ -1055,9 +1055,13 @@ export function exportReportToPdf() {
                 throw new Error('Report container not found');
             }
 
-            // Generate filename with timestamp
-            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
-            const filename = `EY_AI_Taskforce_Report_${timestamp}.pdf`;
+            // Generate filename with date format matching HTML export
+            const date = new Date();
+            const day = String(date.getDate()).padStart(2, '0');
+            const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+            const month = months[date.getMonth()];
+            const year = date.getFullYear();
+            const filename = `EY AI Taskforce Item Tracker ${day} ${month} ${year}.pdf`;
 
             // Configure PDF options
             const opt = {
