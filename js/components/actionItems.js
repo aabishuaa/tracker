@@ -4,7 +4,7 @@
 
 import { state } from '../core/state.js';
 import { saveToStorage } from '../services/storage.js';
-import { escapeHtml, formatDate, formatDateTime, formatDateLong, fuzzyMatch, highlightText } from '../utils/helpers.js';
+import { escapeHtml, formatDate, formatDateTime, formatDateLong, fuzzyMatch, highlightText, parseDateLocal } from '../utils/helpers.js';
 import { openModal, closeModal } from '../ui/modals.js';
 import { showToast } from '../ui/toast.js';
 import { renderCalendar, renderEvents } from './calendar.js';
@@ -123,7 +123,7 @@ export function renderDetailsPanel() {
     // Get upcoming tasks (not done, sorted by due date)
     const upcomingTasks = state.actionItems
         .filter(item => item.status !== 'Done')
-        .sort((a, b) => new Date(a.date) - new Date(b.date))
+        .sort((a, b) => parseDateLocal(a.date) - parseDateLocal(b.date))
         .slice(0, 10); // Show top 10
 
     if (upcomingTasks.length === 0) {
@@ -143,7 +143,7 @@ export function renderDetailsPanel() {
     }
 
     const tasksHtml = upcomingTasks.map(item => {
-        const daysUntilDue = Math.ceil((new Date(item.date) - new Date()) / (1000 * 60 * 60 * 24));
+        const daysUntilDue = Math.ceil((parseDateLocal(item.date) - new Date()) / (1000 * 60 * 60 * 24));
         const isOverdue = daysUntilDue < 0;
         const isDueSoon = daysUntilDue >= 0 && daysUntilDue <= 3;
         const ownersText = Array.isArray(item.owners) ? item.owners.join(', ') : '';
@@ -507,8 +507,8 @@ export function sortActionItems(field) {
         let bVal = b[field];
 
         if (field === 'date') {
-            aVal = new Date(aVal);
-            bVal = new Date(bVal);
+            aVal = parseDateLocal(aVal);
+            bVal = parseDateLocal(bVal);
         } else if (typeof aVal === 'string') {
             aVal = aVal.toLowerCase();
             bVal = bVal.toLowerCase();

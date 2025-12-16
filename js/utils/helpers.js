@@ -9,8 +9,24 @@ export function escapeHtml(text) {
     return div.innerHTML;
 }
 
+// Parse date string in local timezone to avoid off-by-one errors
+export function parseDateLocal(dateStr) {
+    // If dateStr is already a Date object, return it
+    if (dateStr instanceof Date) return dateStr;
+
+    // Parse YYYY-MM-DD format in local timezone
+    const parts = dateStr.split('-');
+    if (parts.length === 3) {
+        // Month is 0-indexed in JavaScript Date
+        return new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+    }
+
+    // Fallback to default Date parsing
+    return new Date(dateStr);
+}
+
 export function formatDate(dateStr) {
-    const date = new Date(dateStr);
+    const date = parseDateLocal(dateStr);
     return date.toLocaleDateString('en-US', {
         month: 'short',
         day: 'numeric',
@@ -19,7 +35,7 @@ export function formatDate(dateStr) {
 }
 
 export function formatDateLong(dateStr) {
-    const date = new Date(dateStr);
+    const date = parseDateLocal(dateStr);
     return date.toLocaleDateString('en-US', {
         weekday: 'long',
         month: 'long',
