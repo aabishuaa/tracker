@@ -447,6 +447,50 @@ function generateReportHTML(stats) {
                     flex: 1;
                 }
 
+                /* Rich text formatting styles */
+                .report-value p {
+                    margin: 0.5rem 0;
+                    line-height: 1.6;
+                }
+
+                .report-value p:first-child {
+                    margin-top: 0;
+                }
+
+                .report-value p:last-child {
+                    margin-bottom: 0;
+                }
+
+                .report-value strong,
+                .report-value b {
+                    font-weight: 600;
+                    color: #1A202C;
+                }
+
+                .report-value em,
+                .report-value i {
+                    font-style: italic;
+                }
+
+                .report-value u {
+                    text-decoration: underline;
+                }
+
+                .report-value ul,
+                .report-value ol {
+                    margin: 0.5rem 0;
+                    padding-left: 1.5rem;
+                }
+
+                .report-value li {
+                    margin: 0.25rem 0;
+                    line-height: 1.5;
+                }
+
+                .report-value br {
+                    line-height: 1.6;
+                }
+
                 .overdue-text {
                     color: #F56565;
                     font-weight: 600;
