@@ -748,7 +748,10 @@ body {
 
 .upcoming-task-card {
     background-color: #F7FAFC;
-    border: 2px solid #E2E8F0;
+    border-left: 2px solid #E2E8F0;
+    border-right: 2px solid #E2E8F0;
+    border-bottom: 2px solid #E2E8F0;
+    border-top: 4px solid #E2E8F0;
     border-radius: 8px;
     padding: 1rem;
     cursor: pointer;
@@ -756,27 +759,27 @@ body {
 }
 
 .upcoming-task-card:hover {
-    border-color: #FFE600;
+    border-top-color: #FFE600;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     transform: translateY(-2px);
 }
 
 .upcoming-task-card.overdue {
-    border-color: #FEB2B2;
+    border-top-color: #FEB2B2;
     background-color: #FFF5F5;
 }
 
 .upcoming-task-card.overdue:hover {
-    border-color: #FC8181;
+    border-top-color: #FC8181;
 }
 
 .upcoming-task-card.due-soon {
-    border-color: #FBD38D;
+    border-top-color: #FBD38D;
     background-color: #FFFAF0;
 }
 
 .upcoming-task-card.due-soon:hover {
-    border-color: #F6AD55;
+    border-top-color: #F6AD55;
 }
 
 .upcoming-task-header {
@@ -1357,14 +1360,17 @@ body {
 
 .stat-card {
     background-color: #F7FAFC;
-    border: 2px solid #E2E8F0;
+    border-left: 2px solid #E2E8F0;
+    border-right: 2px solid #E2E8F0;
+    border-bottom: 2px solid #E2E8F0;
+    border-top: 4px solid #E2E8F0;
     border-radius: 8px;
     padding: 1.5rem;
     transition: all 0.2s ease;
 }
 
 .stat-card:hover {
-    border-color: #FFE600;
+    border-top-color: #FFE600;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
@@ -1443,7 +1449,10 @@ body {
 
 .snapshot-task-card {
     background-color: #F7FAFC;
-    border: 2px solid #E2E8F0;
+    border-left: 2px solid #E2E8F0;
+    border-right: 2px solid #E2E8F0;
+    border-bottom: 2px solid #E2E8F0;
+    border-top: 4px solid #E2E8F0;
     border-radius: 8px;
     padding: 1.25rem;
     cursor: pointer;
@@ -1454,27 +1463,27 @@ body {
 }
 
 .snapshot-task-card:hover {
-    border-color: #FFE600;
+    border-top-color: #FFE600;
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
     transform: translateY(-3px);
 }
 
 .snapshot-task-card.overdue {
-    border-color: #FEB2B2;
+    border-top-color: #FEB2B2;
     background-color: #FFF5F5;
 }
 
 .snapshot-task-card.overdue:hover {
-    border-color: #FC8181;
+    border-top-color: #FC8181;
 }
 
 .snapshot-task-card.due-soon {
-    border-color: #FBD38D;
+    border-top-color: #FBD38D;
     background-color: #FFFAF0;
 }
 
 .snapshot-task-card.due-soon:hover {
-    border-color: #F6AD55;
+    border-top-color: #F6AD55;
 }
 
 .snapshot-task-header-badges {
