@@ -1028,12 +1028,79 @@ export function exportReportToImage() {
     }
 }
 
+/**
+ * Export report to PDF
+ */
+export function exportReportToPdf() {
+    try {
+        showToast('Generating PDF... Please wait', 'info');
+
+        const stats = calculateStatistics();
+        const html = generateReportHTML(stats);
+
+        // Create a temporary container
+        const tempContainer = document.createElement('div');
+        tempContainer.style.position = 'absolute';
+        tempContainer.style.left = '-9999px';
+        tempContainer.style.top = '0';
+        tempContainer.style.width = '1200px';
+        tempContainer.innerHTML = html;
+        document.body.appendChild(tempContainer);
+
+        // Wait for fonts and styles to load
+        setTimeout(() => {
+            const reportContainer = tempContainer.querySelector('.report-container');
+
+            if (!reportContainer) {
+                throw new Error('Report container not found');
+            }
+
+            // Generate filename with timestamp
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+            const filename = `EY_AI_Taskforce_Report_${timestamp}.pdf`;
+
+            // Configure PDF options
+            const opt = {
+                margin: 10,
+                filename: filename,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: {
+                    scale: 2,
+                    useCORS: true,
+                    logging: false,
+                    backgroundColor: '#ffffff'
+                },
+                jsPDF: {
+                    unit: 'mm',
+                    format: 'a4',
+                    orientation: 'portrait'
+                }
+            };
+
+            // Use html2pdf to convert to PDF
+            html2pdf().set(opt).from(reportContainer).save().then(() => {
+                // Clean up
+                document.body.removeChild(tempContainer);
+                showToast('Report exported as PDF successfully!', 'success');
+            }).catch(error => {
+                console.error('Error generating PDF:', error);
+                document.body.removeChild(tempContainer);
+                showToast('Failed to export report as PDF', 'error');
+            });
+        }, 1000);
+    } catch (error) {
+        console.error('Error exporting report to PDF:', error);
+        showToast('Failed to export report to PDF', 'error');
+    }
+}
+
 // Export globally for onclick handlers
 window.reportGenerator = {
     generateReport,
     previewReport,
     exportReportToExcel,
-    exportReportToImage
+    exportReportToImage,
+    exportReportToPdf
 };
 
 export function initReportGeneratorGlobal() {
@@ -1041,4 +1108,5 @@ export function initReportGeneratorGlobal() {
     window.previewReport = previewReport;
     window.exportReportToExcel = exportReportToExcel;
     window.exportReportToImage = exportReportToImage;
+    window.exportReportToPdf = exportReportToPdf;
 }
