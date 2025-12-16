@@ -124,19 +124,25 @@ function generateReportHTML(stats) {
                 </div>
                 <div class="report-item-details">
                     <div class="report-detail-row">
-                        <span class="report-label"><i class="fas fa-user"></i> Owner:</span>
-                        <span class="report-value">${item.owner}</span>
+                        <span class="report-label"><i class="fas fa-users"></i> Owners:</span>
+                        <span class="report-value">${Array.isArray(item.owners) ? item.owners.join(', ') : ''}</span>
                     </div>
-                    ${item.taskforce ? `
-                    <div class="report-detail-row">
-                        <span class="report-label"><i class="fas fa-users"></i> Taskforce:</span>
-                        <span class="report-value">${item.taskforce}</span>
-                    </div>
-                    ` : ''}
                     <div class="report-detail-row">
                         <span class="report-label"><i class="fas fa-calendar"></i> Due Date:</span>
                         <span class="report-value ${isOverdue ? 'overdue-text' : ''}">${formatDate(item.date)} ${isOverdue ? '(Overdue)' : ''}</span>
                     </div>
+                    ${item.latestUpdate ? `
+                    <div class="report-detail-row">
+                        <span class="report-label"><i class="fas fa-info-circle"></i> Latest Update:</span>
+                        <span class="report-value">${item.latestUpdate}</span>
+                    </div>
+                    ` : ''}
+                    ${item.nextSteps ? `
+                    <div class="report-detail-row">
+                        <span class="report-label"><i class="fas fa-arrow-right"></i> Next Steps:</span>
+                        <span class="report-value">${item.nextSteps}</span>
+                    </div>
+                    ` : ''}
                     ${notes !== 'No notes' ? `
                     <div class="report-detail-row">
                         <span class="report-label"><i class="fas fa-sticky-note"></i> Notes:</span>
@@ -683,7 +689,7 @@ export function exportReportToExcel() {
         });
 
         const itemsData = [
-            ['Task Name / Description', 'Owner', 'Taskforce', 'Due Date', 'Status', 'Notes', 'Overdue']
+            ['Task Name / Description', 'Owners', 'Due Date', 'Status', 'Latest Update', 'Next Steps', 'Notes', 'Overdue']
         ];
 
         sortedItems.forEach(item => {
@@ -691,13 +697,15 @@ export function exportReportToExcel() {
             itemDate.setHours(0, 0, 0, 0);
             const isOverdue = itemDate < today && item.status !== 'Done';
             const notes = item.notes ? stripHtml(item.notes) : 'No notes';
+            const ownersText = Array.isArray(item.owners) ? item.owners.join(', ') : '';
 
             itemsData.push([
                 item.description,
-                item.owner,
-                item.taskforce || '',
+                ownersText,
                 formatDate(item.date),
                 item.status,
+                item.latestUpdate || '',
+                item.nextSteps || '',
                 notes,
                 isOverdue ? 'YES' : 'NO'
             ]);
@@ -708,10 +716,11 @@ export function exportReportToExcel() {
         // Set column widths
         itemsSheet['!cols'] = [
             { wch: 45 },  // Task Name
-            { wch: 20 },  // Owner
-            { wch: 30 },  // Taskforce
+            { wch: 25 },  // Owners
             { wch: 15 },  // Date
             { wch: 15 },  // Status
+            { wch: 40 },  // Latest Update
+            { wch: 40 },  // Next Steps
             { wch: 50 },  // Notes
             { wch: 10 }   // Overdue
         ];

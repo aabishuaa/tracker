@@ -114,19 +114,10 @@ function openCardModal(itemId) {
             <div class="meeting-modal-details">
                 <div class="meeting-modal-detail">
                     <div class="meeting-modal-detail-label">
-                        <i class="fas fa-user"></i> Owner
+                        <i class="fas fa-users"></i> Owners
                     </div>
-                    <div class="meeting-modal-detail-value">${escapeHtml(item.owner)}</div>
+                    <div class="meeting-modal-detail-value">${escapeHtml(Array.isArray(item.owners) ? item.owners.join(', ') : '')}</div>
                 </div>
-
-                ${item.taskforce ? `
-                <div class="meeting-modal-detail">
-                    <div class="meeting-modal-detail-label">
-                        <i class="fas fa-users"></i> Taskforce
-                    </div>
-                    <div class="meeting-modal-detail-value">${escapeHtml(item.taskforce)}</div>
-                </div>
-                ` : ''}
 
                 <div class="meeting-modal-detail">
                     <div class="meeting-modal-detail-label">
@@ -412,7 +403,7 @@ function renderItems() {
                     <div class="meeting-item-summary">
                         <div class="meeting-item-summary-row">
                             <span class="meeting-item-summary-label">
-                                <i class="fas fa-user"></i> ${escapeHtml(item.owner)}
+                                <i class="fas fa-users"></i> ${escapeHtml(Array.isArray(item.owners) ? item.owners.join(', ') : '')}
                             </span>
                             <span class="meeting-item-summary-label ${isOverdue ? 'overdue-text' : ''}">
                                 <i class="fas fa-calendar"></i> ${formatDateLong(item.date)}
