@@ -633,6 +633,16 @@ body {
     color: #22543D;
 }
 
+.status-discussing {
+    background-color: #E9D5FF;
+    color: #6B21A8;
+}
+
+.status-under-review {
+    background-color: #DBEAFE;
+    color: #1E40AF;
+}
+
 /* Priority Indicator */
 .priority-dot {
     display: inline-block;
@@ -1806,6 +1816,22 @@ body {
 
 .status-menu-item.done:hover {
     background-color: #F0FFF4;
+}
+
+.status-menu-item.discussing {
+    color: #6B21A8;
+}
+
+.status-menu-item.discussing:hover {
+    background-color: #FAF5FF;
+}
+
+.status-menu-item.under-review {
+    color: #1E40AF;
+}
+
+.status-menu-item.under-review:hover {
+    background-color: #EFF6FF;
 }
 
 .modal-actions {
@@ -3110,6 +3136,16 @@ body:has(.viewer-mode-banner) {
     color: #22543D;
 }
 
+.meeting-item-status-badge.discussing {
+    background: #E9D5FF;
+    color: #6B21A8;
+}
+
+.meeting-item-status-badge.under-review {
+    background: #DBEAFE;
+    color: #1E40AF;
+}
+
 .meeting-priority-badge {
     display: inline-flex;
     align-items: center;
@@ -3368,6 +3404,16 @@ body:has(.viewer-mode-banner) {
 .meeting-modal-status-badge.done {
     background: #C6F6D5;
     color: #22543D;
+}
+
+.meeting-modal-status-badge.discussing {
+    background: #E9D5FF;
+    color: #6B21A8;
+}
+
+.meeting-modal-status-badge.under-review {
+    background: #DBEAFE;
+    color: #1E40AF;
 }
 
 .modal-priority-badge {
