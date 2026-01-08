@@ -141,6 +141,24 @@ function openCardModal(itemId) {
                 </div>
             </div>
 
+            ${item.latestUpdate ? `
+            <div class="meeting-modal-notes">
+                <div class="meeting-modal-notes-label">
+                    <i class="fas fa-clock"></i> Latest Update
+                </div>
+                <div class="meeting-modal-notes-content rich-text-content">${item.latestUpdate}</div>
+            </div>
+            ` : ''}
+
+            ${item.nextSteps ? `
+            <div class="meeting-modal-notes">
+                <div class="meeting-modal-notes-label">
+                    <i class="fas fa-forward"></i> Next Steps
+                </div>
+                <div class="meeting-modal-notes-content rich-text-content">${item.nextSteps}</div>
+            </div>
+            ` : ''}
+
             ${notes ? `
             <div class="meeting-modal-notes">
                 <div class="meeting-modal-notes-label">
@@ -423,6 +441,20 @@ function renderItems() {
                                 <i class="fas fa-calendar"></i> ${formatDateLong(item.date)}
                             </span>
                         </div>
+                        ${item.latestUpdate ? `
+                        <div class="meeting-item-summary-row">
+                            <span class="meeting-item-summary-label" style="color: #4A5568; font-size: 0.85rem;">
+                                <i class="fas fa-clock"></i> <strong>Latest Update:</strong> ${escapeHtml(stripHtml(item.latestUpdate))}
+                            </span>
+                        </div>
+                        ` : ''}
+                        ${item.nextSteps ? `
+                        <div class="meeting-item-summary-row">
+                            <span class="meeting-item-summary-label" style="color: #4A5568; font-size: 0.85rem;">
+                                <i class="fas fa-forward"></i> <strong>Next Steps:</strong> ${escapeHtml(stripHtml(item.nextSteps))}
+                            </span>
+                        </div>
+                        ` : ''}
                     </div>
                 </div>
             `;
