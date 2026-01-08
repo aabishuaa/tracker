@@ -141,7 +141,6 @@ function attachEventListeners() {
     document.getElementById('meetingViewBtn').addEventListener('click', openMeetingView);
     document.getElementById('generateReportBtn').addEventListener('click', generateReport);
     document.getElementById('previewReportBtn').addEventListener('click', previewReport);
-    document.getElementById('exportReportExcelBtn').addEventListener('click', exportReportToExcel);
     document.getElementById('exportReportImageBtn').addEventListener('click', exportReportToImage);
     document.getElementById('exportReportPdfBtn').addEventListener('click', exportReportToPdf);
 

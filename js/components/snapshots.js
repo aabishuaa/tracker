@@ -44,7 +44,9 @@ export function renderSnapshotVisualization() {
     const totalItems = state.actionItems.length;
     const statusCounts = {
         'Not Started': 0,
+        'Discussing': 0,
         'In Progress': 0,
+        'Under Review': 0,
         'Blocked': 0,
         'Done': 0
     };
@@ -156,13 +158,17 @@ function createSnapshotCharts(statusCounts, totalItems) {
     const statusData = Object.values(statusCounts);
     const statusColors = {
         'Not Started': '#E2E8F0',
+        'Discussing': '#E9D5FF',
         'In Progress': '#FED7AA',
+        'Under Review': '#DBEAFE',
         'Blocked': '#FED7D7',
         'Done': '#C6F6D5'
     };
     const statusBorderColors = {
         'Not Started': '#CBD5E0',
+        'Discussing': '#6B21A8',
         'In Progress': '#ED8936',
+        'Under Review': '#1E40AF',
         'Blocked': '#E53E3E',
         'Done': '#48BB78'
     };

@@ -3547,6 +3547,18 @@ body:has(.viewer-mode-banner) {
     color: #38A169;
 }
 
+.meeting-status-btn.discussing.active {
+    border-color: #6B21A8;
+    background: #FAF5FF;
+    color: #6B21A8;
+}
+
+.meeting-status-btn.under-review.active {
+    border-color: #1E40AF;
+    background: #EFF6FF;
+    color: #1E40AF;
+}
+
 .meeting-modal-body {
     padding: 2rem;
     overflow-y: auto;
